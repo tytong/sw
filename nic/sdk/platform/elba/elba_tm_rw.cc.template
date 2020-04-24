@@ -1053,7 +1053,8 @@ elba_tm_uplink_lif_set (uint32_t port, uint32_t lif)
             }
 //:: #endfor
         default:
-            return sdk::SDK_RET_ERR;
+            return sdk::SDK_RET_OK; // TBD-ELBA-REBASE:: fixup
+            //return sdk::SDK_RET_ERR;
     }
 
     /* Write the csr */
@@ -3075,6 +3076,7 @@ elba_tm_get_iq_stats (tm_port_t port, tm_q_t iq, tm_iq_stats_t *iq_stats)
 sdk_ret_t
 elba_tm_reset_iq_stats (tm_port_t port, tm_q_t iq)
 {
+#if 0   /* TBD-ELBA-REBASE: */
     uint32_t num_hbm_contexts_per_port;
     uint32_t context;
     tm_port_type_e port_type;
@@ -3101,6 +3103,9 @@ elba_tm_reset_iq_stats (tm_port_t port, tm_q_t iq)
 
     }
     return sdk::SDK_RET_OK;
+#else
+    return sdk::SDK_RET_OK;
+#endif
 }
 
 sdk_ret_t
