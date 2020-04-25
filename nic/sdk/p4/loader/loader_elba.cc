@@ -167,7 +167,7 @@ p4_load_mpu_programs (const char *handle,
 
     /* ISA library initialization */
     if (libelbisa_init() < 0) {
-	    SDK_TRACE_ERR("Libelbisa initialization failed!");
+        SDK_TRACE_ERR("Libelbisa initialization failed!");
         SDK_ASSERT_RETURN(0, SDK_RET_ERR);
     }
 

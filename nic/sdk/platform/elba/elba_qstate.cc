@@ -138,8 +138,18 @@ elba_set_qstate_map (lif_qstate_t *qstate, T *entry, uint8_t enable)
 void
 elba_program_qstate_map (lif_qstate_t *qstate, uint8_t enable)
 {
-    return;
+    elb_top_csr_t & elb0 = ELB_BLK_REG_MODEL_ACCESS(elb_top_csr_t, 0, 0);
+
+    auto *wa_entry = &elb0.db.wa.dhs_lif_qstate_map.entry[qstate->lif_id];
+    elba_set_qstate_map(qstate, wa_entry, enable);
+    auto *psp_entry = &elb0.pt.pt.psp.dhs_lif_qstate_map.entry[qstate->lif_id];
+    elba_set_qstate_map(qstate, psp_entry, enable);
+    auto *xd_psp_entry = &elb0.xd.pt.psp.dhs_lif_qstate_map.entry[qstate->lif_id];
+    elba_set_qstate_map(qstate, xd_psp_entry, enable);
+    auto *pr_entry = &elb0.pr.pr.psp.dhs_lif_qstate_map.entry[qstate->lif_id];
+    elba_set_qstate_map(qstate, pr_entry, enable);
 }
+
 
 template <typename T>
 void
@@ -268,15 +278,17 @@ read_lif_params_from_elba (LIFQState *qstate)
 sdk_ret_t
 elba_read_qstate (uint64_t q_addr, uint8_t *buf, uint32_t q_size)
 {
+    return sdk::asic::asic_mem_read(q_addr, buf, q_size);
     // TBD-ELBA-REBASE: hal to sdk Missing Function compared to Capri
-    return SDK_RET_OK;
+    //return SDK_RET_OK;
 }
 
 sdk_ret_t
 elba_write_qstate (uint64_t q_addr, const uint8_t *buf, uint32_t q_size)
 {
+    return sdk::asic::asic_mem_write(q_addr, (uint8_t *)buf, q_size);
     // TBD-ELBA-REBASE: hal to sdk Missing Function compared to Capri
-    return SDK_RET_OK;
+    //return SDK_RET_OK;
 }
 
 sdk_ret_t

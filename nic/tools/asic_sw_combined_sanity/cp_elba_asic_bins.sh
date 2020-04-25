@@ -31,7 +31,16 @@ cp -v $ASIC_SRC/ip/verif/pcpp/pen_mem_base.h $NIC_DIR/sdk/model_sim/include/pen_
 cp -v $ASIC_SRC/ip/verif/pcpp/pknobs.h $NIC_DIR/sdk/model_sim/include/pknobs.h
 cp -v $ASIC_SRC/ip/verif/pcpp/LogMsg.h $NIC_DIR/sdk/model_sim/include/LogMsg.h
 cp -v $ASIC_SRC/ip/verif/pcpp/common_dpi.h $NIC_DIR/sdk/model_sim/include/common_dpi.h
-#cp -v $ASIC_SRC/capri/model/utils/cap_blk_env_base.h include/cap_blk_env_base.h -- Where is elba file
+cp -v $ASIC_SRC/elba/model/utils/elb_blk_env_base.h $NIC_DIR/sdk/model_sim/include/elb_blk_env_base.h
+cp -v $ASIC_GEN/elba/verif/common/manifest/libcommon_cc.so $NIC_DIR/sdk/model_sim/libs/elba/libcommon_cc.so
+cp -v $ASIC_GEN/elba/model/elb_top/libmodel_cc.so $NIC_DIR/sdk/model_sim/libs/elba/libmodel_cc.so
+cp -v $ASIC_GEN/elba/verif/common/manifest/libtop_csr_compile.so $NIC_DIR/sdk/model_sim/libs/elba/libtop_csr_compile.so
+cp -v $ASIC_SRC/ip/verif/pensim/gen/lib/libasmsym.a $NIC_DIR/sdk/model_sim/libs/elba/libasmsym.a
+cp -v $ASIC_SRC/ip/verif/pensim/gen/lib/libelbsim.a $NIC_DIR/sdk/model_sim/libs/elba/libelbsim.a
+cp -v $ASIC_SRC/ip/verif/pensim/gen/lib/libisa.a $NIC_DIR/sdk/model_sim/libs/elba/libisa.a
+cp -v $ASIC_SRC/ip/verif/pensim/gen/lib/libelbisa.a $NIC_DIR/sdk/model_sim/libs/elba/libelbisa.a
+cp -v $ASIC_SRC/ip/verif/pensim/gen/lib/libmpuobj.a $NIC_DIR/sdk/model_sim/libs/elba/libmpuobj.a
+
 cp -v $ASIC_SRC/elba/model/elb_te/elb_te_csr.json $NIC_DIR/tools/ncc/csr_json/
 cp -v $ASIC_SRC/elba/model/elb_ppa/elb_ppa_decoders.json $NIC_DIR/tools/ncc/csr_json/
 cp -v $ASIC_SRC/elba/model/elb_ppa/elb_ppa_csr.json $NIC_DIR/tools/ncc/csr_json/

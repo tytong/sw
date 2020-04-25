@@ -210,6 +210,8 @@ MODULE_SRCS     = ${ASIC_SRC}/elba/model/elb_top/elb_top_csr.cc \
                   ${ASIC_SRC}/elba/verif/apis/elb_pcie_api.cc \
                   ${ASIC_SRC}/elba/verif/apis/elb_sbus_api.cc \
                   ${ASIC_SRC}/elba/verif/apis/elb_elam_api.cc \
+                  ${ASIC_SRC}/elba/verif/apis/elb_platform_api.cc \
+                  ${ASIC_SRC}/elba/verif/apis/elb_i2c_api.cc \
                   $(wildcard ${ASIC_SRC}/elba/model/elb_dpa/*csr.cc) \
                   $(wildcard ${ASIC_SRC}/elba/model/elb_pb/*port*csr.cc) \
                   ${SDKDIR}/platform/elba/csrint/csr_init.cc

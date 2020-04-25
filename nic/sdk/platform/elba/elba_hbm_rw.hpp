@@ -22,11 +22,16 @@ using sdk::platform::utils::mpartition_region_t;
 #define    JUMBO_FRAME_SIZE             9216
 #define    ETH_FRAME_SIZE               1536
 
+
+#define MEM_REGION_MCAST_REPL_NAME "mcast_repl"
+
 mpartition_region_t *get_mem_region(char *name);
 uint64_t get_mem_base(void);
 uint64_t get_mem_offset(const char *reg_name);
 uint64_t get_mem_addr(const char *reg_name);
 uint32_t get_mem_size_kb(const char *reg_name);
+
+
 
 typedef struct elba_descr_s {
         uint64_t        scratch[8];

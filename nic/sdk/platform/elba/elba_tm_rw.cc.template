@@ -610,12 +610,15 @@ elba_tm_uplink_q_params_update (tm_port_t port, tm_uplink_q_params_t *q_params)
     }
 
     tm_port_type_e port_type = elba_tm_get_port_type(port);
+        SDK_TRACE_ERR("=== port %u mtu %u jumbo %u",
+                      port, q_params->mtu, tm_cfg_profile()->jumbo_mtu[port_type]);
     if (q_params->mtu > tm_cfg_profile()->jumbo_mtu[port_type]) {
         SDK_TRACE_ERR("Invalid mtu %u larger than the jumbo %u",
                       q_params->mtu, tm_cfg_profile()->jumbo_mtu[port_type]);
         return sdk::SDK_RET_INVALID_ARG;
     }
 
+        SDK_TRACE_ERR("=== P4 Oq %u for uplink port %u", q_params->p4_q, port);
     if ((q_params->p4_q < (signed)ELBA_TM_P4_UPLINK_IQ_OFFSET) ||
         (q_params->p4_q >= (signed)elba_tm_get_num_iqs_for_port_type(TM_PORT_TYPE_P4IG))) {
         SDK_TRACE_ERR("Invalid P4 Oq %u for uplink port %u",
@@ -680,6 +683,7 @@ elba_tm_uplink_q_params_update (tm_port_t port, tm_uplink_q_params_t *q_params)
                         }
 //::        #endfor
                     default:
+                        SDK_TRACE_ERR("=== 1. port %u error", port);
                         return sdk::SDK_RET_ERR;
                 }
 
@@ -741,8 +745,11 @@ elba_tm_uplink_q_params_update (tm_port_t port, tm_uplink_q_params_t *q_params)
 //::    #endif
 //:: #endfor
         default:
+                        SDK_TRACE_ERR("=== 2: port %u error", port);
             return sdk::SDK_RET_ERR;
     }
+
+    SDK_TRACE_ERR("=== port %u ok", port);
     return sdk::SDK_RET_OK;
 }
 
@@ -875,7 +882,8 @@ elba_tm_scheduler_map_update_l${level} (uint32_t port,
                                         uint32_t node,
                                         tm_queue_node_params_t *node_params)
 {
-#ifdef TODO_ELBA
+//TBD-ELBA-REBASE
+#ifdef TBD_ELBA_REBASE
     stringstream data;
     data << hex << endl;
     elb_top_csr_t &elb0 = ELB_BLK_REG_MODEL_ACCESS(elb_top_csr_t, 0, 0);
@@ -3122,6 +3130,73 @@ elba_tm_debug_stats_get (tm_port_t port, tm_debug_stats_t *debug_stats,
     return sdk::SDK_RET_OK;
 }
 
+uint32_t
+elba_tm_get_port_occupancy (tm_port_t port, uint32_t iq)
+{
+//TBD-ELBA-REBASE
+#ifdef TBD_ELBA_REBASE
+    cap_top_csr_t &cap0 = g_capri_state_pd->cap_top();
+    cap_pbc_csr_t &pbc_csr = cap0.pb.pbc;
+    cpp_int port_payload_occupancy_val;
+    uint32_t payload_occupancy = 0;
+
+    switch(port) {
+//:: for p in range(TM_PORTS):
+//::    pinfo = port_info[p]
+//::    if pinfo["type"] == "uplink":
+        case ${pinfo["enum"]}:
+            pbc_csr.hbm.hbm_port_${p}.cfg_hbm_eth_payload_occupancy.read();
+            port_payload_occupancy_val = pbc_csr.hbm.hbm_port_${p}.cfg_hbm_eth_payload_occupancy.threshold();
+            payload_occupancy = cpp_helper.get_slc(port_payload_occupancy_val, iq*19, ((iq+1)*19)-1).convert_to<uint32_t>();
+            break;
+//::    #endif
+//:: #endfor
+        default:
+            break;
+    }
+
+    return (payload_occupancy << 10);
+#endif
+    return 1;
+}
+
+uint32_t
+elba_tm_get_xon_threshold (uint32_t ctx)
+{
+//TBD-ELBA-REBASE
+#ifdef TBD_ELBA_REBASE
+    cap_top_csr_t &cap0 = g_capri_state_pd->cap_top();
+    cap_pbc_csr_t &pbc_csr = cap0.pb.pbc;
+    uint32_t xon_threshold = 0;
+    cpp_int xon_val;
+
+    pbc_csr.hbm.cfg_hbm_threshold.read();
+    xon_val = pbc_csr.hbm.cfg_hbm_threshold.xon();
+    xon_threshold = cpp_helper.get_slc(xon_val, ctx*20, ((ctx+1)*20)-1).convert_to<uint32_t>();
+    return (xon_threshold << 9);
+#endif
+    return 255;
+}
+
+uint32_t
+elba_tm_get_xoff_threshold (uint32_t ctx)
+{
+//TBD-ELBA-REBASE
+#ifdef TBD_ELBA_REBASE
+    cap_top_csr_t &cap0 = g_capri_state_pd->cap_top();
+    cap_pbc_csr_t &pbc_csr = cap0.pb.pbc;
+    uint32_t xoff_threshold = 0;
+    cpp_int xoff_val;
+
+    pbc_csr.hbm.cfg_hbm_threshold.read();
+    xoff_val = pbc_csr.hbm.cfg_hbm_threshold.xoff();
+    xoff_threshold = cpp_helper.get_slc(xoff_val, ctx*20, ((ctx+1)*20)-1).convert_to<uint32_t>();
+
+    return (xoff_threshold << 9);
+#endif
+    return 100;
+}
+
 // set the reserved min for uplink ports
 sdk_ret_t
 elba_tm_set_reserved_min (uint32_t reserved_min)
@@ -3154,6 +3229,26 @@ elba_tm_set_uplink_mac_xoff (tm_port_t port, bool reset_all_xoff,
     return SDK_RET_OK; // TBD-ELBA-REBASE:: fixup
 }
 
+sdk_ret_t
+elba_tm_get_current_credits (tm_port_t tm_port,
+                              tm_q_t oq,
+                              uint32_t *val)
+{
+//TBD-ELBA-REBASE
+#ifdef TBD_ELBA_REBASE
+    cap_top_csr_t &cap0 = g_capri_state_pd->cap_top();
+    cap_pbc_csr_t &pbc_csr = cap0.pb.pbc;
+
+    if (tm_port == CAPRI_TM_PORT_EGRESS) {
+        *val = pbc_csr.port_10.dhs_oq_flow_control.entry[oq].entry().convert_to<uint32_t>();
+    } else if (tm_port == CAPRI_TM_PORT_INGRESS) {
+        *val = pbc_csr.port_11.dhs_oq_flow_control.entry[oq].entry().convert_to<uint32_t>();
+    } else {
+        return SDK_RET_ERR;
+    }
+#endif
+    return SDK_RET_OK;
+}
 
 
 }    // namespace elba

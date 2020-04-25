@@ -430,12 +430,10 @@ elba_init (asic_cfg_t *cfg)
                                 "PXB/PCIE init failure, err : %d", ret);
     }
 
-#if 0 /* TBD-ELBA-REBASE */
     ret = elba_tm_init(cfg->catalog,
                        &cfg->device_profile->qos_profile);
     SDK_ASSERT_TRACE_RETURN((ret == SDK_RET_OK), ret,
                             "Elba TM init failure, err : %d", ret);
-#endif
 
 #if 0 /* TBD-ELBA-REBASE */
     ret = elba_pf_init();

@@ -277,7 +277,34 @@ elba_program_hbm_table_base_addr (int tableid, int stage_tableid,
 void
 elba_program_p4plus_table_mpu_pc(int tableid, int stage_tbl_id, int stage)
 {
-    // TBD-ELBA-REBASE:: Missing function from capri
+    uint64_t pc = 0;
+    elb_te_csr_t *te_csr = NULL;
+    bool pipe_rxdma = false;
+
+    elb_top_csr_t & elb0 = ELB_BLK_REG_MODEL_ACCESS(elb_top_csr_t, 0, 0);
+
+    if ((uint32_t)tableid >= p4pd_rxdma_tableid_min_get() &&
+        (uint32_t)tableid < p4pd_rxdma_tableid_max_get()) {
+        uint32_t lcl_tableid = tableid - p4pd_rxdma_tableid_min_get();
+        te_csr = &elb0.pcr.te[stage];
+        pc = elba_table_rxdma_asm_base[lcl_tableid];
+        pipe_rxdma = true;
+    } else if ((uint32_t)tableid >= p4pd_txdma_tableid_min_get() &&
+               (uint32_t)tableid < p4pd_txdma_tableid_max_get()) {
+        uint32_t lcl_tableid = tableid - p4pd_txdma_tableid_min_get();
+        te_csr = &elb0.pct.te[stage];
+        pc = elba_table_txdma_asm_base[lcl_tableid];
+        pipe_rxdma = false;
+    }
+    if (pc == 0) {
+        return;
+    }
+    SDK_TRACE_DEBUG("Pipe %s, Stage %d, Tbl_id %u, Stg_Tbl_id %u, "
+                    "Tbl base 0x%lx", ((pipe_rxdma) ? "RxDMA" : "TxDMA"),
+                    stage, tableid, stage_tbl_id, pc);
+    te_csr->cfg_table_property[stage_tbl_id].read();
+    te_csr->cfg_table_property[stage_tbl_id].mpu_pc(pc >> 6);
+    te_csr->cfg_table_property[stage_tbl_id].write();
 }
 uint64_t
 elba_get_p4plus_table_mpu_pc(int tableid)

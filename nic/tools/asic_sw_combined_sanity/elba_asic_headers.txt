@@ -412,6 +412,7 @@
 ./elba/verif/apis/elb_stg_sw_api.h
 ./elba/verif/apis/elb_wa_sw_api.h
 ./elba/verif/apis/elb_pcie_api.h
+./elba/verif/apis/elb_pcie_sw_api.h
 ./elba/verif/apis/elb_pics_api.h
 ./elba/verif/apis/elb_pict_api.h
 ./elba/verif/apis/elb_ppa_api.h
@@ -421,6 +422,9 @@
 ./elba/verif/apis/elb_quiesce_api.h
 ./elba/verif/apis/elb_stg_api.h
 ./elba/verif/apis/elb_txs_sw_api.h
+./elba/verif/apis/elb_platform_api.h
+./elba/verif/apis/elb_i2c_api.h
+./elba/verif/apis/elb_pal_i2c_sw_glue.h
 ./elba/verif/apis/elb_wa_api.h
 ./elba/verif/apis/elb_base_api.h
 ./elba/verif/apis/elb_ns_soc_ip.h

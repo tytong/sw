@@ -19,6 +19,8 @@ echo "\"port-admin-state\": \"PORT_ADMIN_STATE_ENABLE\"," >> /sw/nic/conf/device
 echo "\"mgmt-if-mac\": 0" >> /sw/nic/conf/device.conf
 echo "}" >> /sw/nic/conf/device.conf
 
+cp $HAL_CONFIG_PATH/hal_classic.ini $HAL_CONFIG_PATH/hal.ini
+
 echo "STARTING HAL: `date +%x_%H:%M:%S:%N`"
 IRIS_BLD_DIR=$NIC_DIR/build/x86_64/iris/${ASIC}
 $GDB $IRIS_BLD_DIR/bin/hal -c hal.json 2>&1

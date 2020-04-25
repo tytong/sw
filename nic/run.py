@@ -77,7 +77,13 @@ os.environ["PKG_CONFIG_PATH"] = "/usr/local/lib/pkgconfig"
 
 #Path and executables
 bin_dir = nic_dir + '/build/x86_64/iris/' + asic + '/bin/'
-model_executable = bin_dir + "cap_model"
+if asic == 'elba':
+    model_name = "elb_model"
+else:
+    model_name = "cap_model"
+
+model_executable = bin_dir + model_name
+
 model_core_path  = nic_dir
 
 hal_executable = bin_dir + "hal"
@@ -199,7 +205,7 @@ def run_model(args):
     if args.test_suf:
         model_log = nic_dir + "/logs_%s/model.log" % args.test_suf
     os.environ["LD_LIBRARY_PATH"] = ".:/usr/local/lib:/usr/local/lib64:/home/asic/bin/tools/lib64"
-    model_cmd = [ "./cap_model", "+PLOG_MAX_QUIT_COUNT=0", "+plog_add_scope=axi_trace" ]
+    model_cmd = [ "./"+model_name, "+PLOG_MAX_QUIT_COUNT=0", "+plog_add_scope=axi_trace" ]
     if args.modellogs:
         model_cmd.append("+plog=info")
         if args.gft or args.gft_gtest:

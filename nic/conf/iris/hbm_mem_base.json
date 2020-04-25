@@ -183,22 +183,22 @@
         {
             "name": "brq-ring-cp",
             "size": "256K",
-            "reset": true
+            "reset": false
         },
         {
             "name": "brq-ring-cp-hot",
             "size": "256K",
-            "reset": true
+            "reset": false
         },
         {
             "name": "brq-ring-dc",
             "size": "256K",
-            "reset": true
+            "reset": false
         },
         {
             "name": "brq-ring-dc-hot",
             "size": "256K",
-            "reset": true
+            "reset": false
         },
         {
             "name": "crypto-sym-msg-descr",
@@ -313,12 +313,12 @@
         {
             "name": "brq-ring-xts0",
             "size": "512K",
-            "reset": true
+            "reset": false
         },
         {
             "name": "brq-ring-xts1",
             "size": "512K",
-            "reset": true
+            "reset": false
         },
         {
             "name": "tls_proxy_pad_table",
@@ -327,7 +327,7 @@
         {
             "name": "lif_stats",
             "size": "1024K",
-            "reset": true,
+            "reset": false,
             "cache": "p4plus-all"
         },
         {
@@ -339,23 +339,23 @@
         {
             "name": "p4_program",
             "size": "64K",
-            "reset": true
+            "reset": false
         },
         {
             "name": "p4_atomic_stats",
             "size": "1024K",
-            "reset": true
+            "reset": false
         },
         {
             "name": "tcp_proxy_stats",
             "size": "1K",
-            "reset": true
+            "reset": false
         },
         {
             "name": "flow_hash",
             "size": "131072K",
             "cache": "p4ig",
-            "reset": true
+            "reset": false
         },
         {
             "name": "flow_hash_overflow",
@@ -380,13 +380,13 @@
         {
             "name": "mcast_repl",
             "size": "4096K",
-            "reset": true
+            "reset": false
         },
         {
             "name": "p4plus_program",
             "size": "256K",
             "cache": "p4plus-all",
-            "reset": true
+            "reset": false
         },
         {
             "name": "rdma",
@@ -395,7 +395,7 @@
         {
             "name": "rdma-atomic-resource-addr",
             "size": "1K",
-            "reset": true
+            "reset": false
         },
         {
             "name": "key-desc-array",
@@ -404,17 +404,17 @@
         {
             "name": "rdma-eq-intr-table",
             "size": "32K",
-            "reset": true
+            "reset": false
         },
         {
             "name": "rdma-stats-hdrs",
             "size": "2K",
-            "reset": true
+            "reset": false
         },
         {
             "name": "nvme",
             "size": "6M",
-            "reset": true
+            "reset": false
         },
         {
             "name": "ipfix",
@@ -449,12 +449,12 @@
             "_comment2": "Num timers = hash depth * 16 * 12 = 196608",
             "name": "timers",
             "size": "1088K",
-            "reset": true
+            "reset": false
         },
         {
             "name": "tx-scheduler",
             "size": "2048K",
-            "reset": true
+            "reset": false
         },
         {
             "name": "p4pt-tcb",
@@ -504,7 +504,7 @@
         {
             "name": "tls_proxy_global_stats",
             "size": "1K",
-            "reset": true
+            "reset": false
         },
         {
             "name": "tcp_ooo_rx2tx_queue",
@@ -521,17 +521,17 @@
         {
             "name": "session-summary-stats",
             "size": "512B",
-            "reset": true
+            "reset": false
         },
         {
             "name": "fte-stats",
             "size": "512B",
-            "reset": true
+            "reset": false
         },
         {
             "name": "p4_hwerr_stats",
             "size": "1K",
-            "reset": true
+            "reset": false
         },
         {
             "name": "storage-qinfo",
@@ -540,17 +540,17 @@
         {
             "name": "storage-rgroup",
             "size": "4K",
-            "reset": true
+            "reset": false
         },
         {
             "name": "tcp_proxy_per_flow_stats",
             "size": "8192K",
-            "reset": true
+            "reset": false
         },
         {
             "name": "nwsec_rule_stats",
             "size": "8192K",
-            "reset": true
+            "reset": false
         },
         {
             "_comment" : "64K entries resources of 128 Bytes each",
@@ -562,23 +562,23 @@
             "_comment6" : "tables and use them for Flow-Visibility initiative",
             "name": "flow_telemetry_stats",
             "size": "8M",
-            "reset": true
+            "reset": false
         },
         {
             "_comment" : "32 entries of 64 Bytes each",
             "name": "opaque_tag",
             "size": "2K",
-            "reset": true
+            "reset": false
         },
         {
             "name": "tcp-actl-q",
             "size": "256K",
-            "reset": true
+            "reset": false
         },
         {
             "name": "qos-dscp-cos-map",
             "size": "64B",
-            "reset": true
+            "reset": false
         },
         {
             "name": "clock",
@@ -595,12 +595,12 @@
         {
             "name": "port_stats",
             "size": "3K",
-            "reset": true
+            "reset": false
         },
         {
             "name": "uplink_stats",
             "size": "3K",
-            "reset": true
+            "reset": false
         }
     ]
 }

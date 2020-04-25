@@ -17,8 +17,14 @@ namespace platform {
 namespace elba {
 
 void
-csr_init ()
+csr_init (void)
 {
+    static bool csr_init_done = false;
+
+    if (csr_init_done) {
+       return;
+    }
+
     // Register for hal cpu interface
     auto cpu_if = new cpu_hal_if("cpu", "all");
     cpu::access()->add_if("cpu_if", cpu_if);
@@ -30,6 +36,7 @@ csr_init ()
     elb0_ptr->init(0);
     ELB_BLK_REG_MODEL_REGISTER(elb_top_csr_t, 0, 0, elb0_ptr);
     register_chip_inst("elb0", 0, 0);
+    csr_init_done = true;
 }
 
 }    // end namespace elba
