@@ -1144,6 +1144,7 @@ elba_tm_get_buffer_occupancy (tm_port_t port, tm_q_t iq,
 sdk_ret_t
 elba_tm_drain_uplink_port (tm_port_t port)
 {
+#if 0 // TBD-ELBA-REBASE
     bool all_zeroes = false;
     uint32_t tries = 0;
     uint32_t max_tries = 1000;
@@ -1173,7 +1174,7 @@ elba_tm_drain_uplink_port (tm_port_t port)
                       port, tries);
         return sdk::SDK_RET_RETRY;
     }
-
+#endif
     return sdk::SDK_RET_OK;
 }
 

@@ -2,5 +2,6 @@
 include ${MKDEFS}/pre.mk
 MODULE_TARGET   := capmon.bin
 MODULE_SOLIBS   := pal
+MODULE_ASIC     := capri
 
 include ${MKDEFS}/post.mk

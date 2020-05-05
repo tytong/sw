@@ -11,6 +11,7 @@ MODULE_SRCS     = ${MODULE_SRC_DIR}/linkmgr.cc  \
 	          ${MODULE_SRC_DIR}/port_mac.cc  
 ifeq ($(ASIC),elba)
 MODULE_SRCS     +=  ${MODULE_SRC_DIR}/port_serdes_elba.cc
+MODULE_FLAGS    = -DELBA
 else
 MODULE_SRCS     +=  ${MODULE_SRC_DIR}/port_serdes.cc
 endif

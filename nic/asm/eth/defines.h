@@ -3,8 +3,15 @@
 #include "asic/cmn/asic_common.hpp"
 #include "nic/p4/common/defines.h"
 #include "nic/asm/common-p4+/include/capri-macros.h"
+#ifdef ELBA
+#include "elb_top_csr_defines.h"
+#include "elb_intr_c_hdr.h"
+#define INTR_ASSERT_BASE        (ELB_ADDR_BASE_INTR_INTR_OFFSET + ELB_INTR_CSR_DHS_INTR_ASSERT_BYTE_OFFSET)
+#else 
 #include "cap_top_csr_defines.h"
 #include "cap_intr_c_hdr.h"
+#define INTR_ASSERT_BASE        (CAP_ADDR_BASE_INTR_INTR_OFFSET + CAP_INTR_CSR_DHS_INTR_ASSERT_BYTE_OFFSET)
+#endif
 
 #define TABLE_VALID(n)          (1 << (3 - (n)))
 #define TABLE_VALID_0           TABLE_VALID(0)
@@ -18,7 +25,6 @@
 #define EQ_CODE_RX_COMP_HX      0x0100
 #define EQ_CODE_TX_COMP_HX      0x0200
 
-#define INTR_ASSERT_BASE        (CAP_ADDR_BASE_INTR_INTR_OFFSET + CAP_INTR_CSR_DHS_INTR_ASSERT_BYTE_OFFSET)
 #define LG2_INTR_ASSERT_STRIDE  2
 
 struct phv2pkt {

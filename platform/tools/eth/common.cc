@@ -12,9 +12,15 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
-#include "third-party/asic/capri/model/cap_top/cap_top_csr_defines.h"
-#include "third-party/asic/capri/model/cap_top/csr_defines/cap_wa_c_hdr.h"
-#include "third-party/asic/capri/model/cap_top/csr_defines/cap_pics_c_hdr.h"
+#ifdef ELBA
+#include "elb_top_csr_defines.h"
+#include "elb_wa_c_hdr.h"
+#include "elb_pics_c_hdr.h"
+#else
+#include "cap_top_csr_defines.h"
+#include "cap_wa_c_hdr.h"
+#include "cap_pics_c_hdr.h"
+#endif
 
 #include "nic/sdk/lib/pal/pal.hpp"
 #include "nic/sdk/lib/device/device.hpp"
@@ -24,10 +30,10 @@
 
 #include "impl.hpp"
 
-
 bool
 get_lif_qstate(uint16_t lif, queue_info_t qinfo[QTYPE_MAX])
 {
+#ifndef ELBA
     uint32_t cnt[4] = {0};
     uint32_t size[QTYPE_MAX] = {0};
     uint32_t length[QTYPE_MAX] = {0};
@@ -65,6 +71,43 @@ get_lif_qstate(uint16_t lif, queue_info_t qinfo[QTYPE_MAX])
                 (CAP_WA_CSR_DHS_LIF_QSTATE_MAP_ENTRY_ENTRY_2_4_LENGTH5_4_1_GET(cnt[2]) << 1);
     length[6] = CAP_WA_CSR_DHS_LIF_QSTATE_MAP_ENTRY_ENTRY_2_4_LENGTH6_GET(cnt[2]);
     length[7] = CAP_WA_CSR_DHS_LIF_QSTATE_MAP_ENTRY_ENTRY_2_4_LENGTH7_GET(cnt[2]);
+#else
+    uint32_t cnt[8] = {0};
+    uint32_t size[QTYPE_MAX] = {0};
+    uint32_t length[QTYPE_MAX] = {0};
+
+    sdk::lib::pal_reg_read(ELB_ADDR_BASE_DB_WA_OFFSET +
+                               ELB_WA_CSR_DHS_LIF_QSTATE_MAP_BYTE_ADDRESS + (32 * lif),
+                           cnt, 8);
+
+    // decode lif qstate table:
+    uint8_t valid = ELB_WA_CSR_DHS_LIF_QSTATE_MAP_ENTRY_ENTRY_0_8_VLD_GET(cnt[0]);
+    if (!valid) {
+        printf("Invalid lif %u\n", lif);
+        return false;
+    }
+
+    uint64_t base =
+        (uint64_t)ELB_WA_CSR_DHS_LIF_QSTATE_MAP_ENTRY_ENTRY_0_8_QSTATE_BASE_GET(cnt[0]);
+    // Qstate Size: 3 bit size is qstate size (32B/64B/128B)
+    size[0] = (ELB_WA_CSR_DHS_LIF_QSTATE_MAP_ENTRY_ENTRY_1_8_SIZE0_2_1_GET(cnt[1])<<1)|ELB_WA_CSR_DHS_LIF_QSTATE_MAP_ENTRY_ENTRY_0_8_SIZE0_0_0_GET(cnt[0]);
+    size[1] = (ELB_WA_CSR_DHS_LIF_QSTATE_MAP_ENTRY_ENTRY_1_8_SIZE1_GET(cnt[1]));
+    size[2] = (ELB_WA_CSR_DHS_LIF_QSTATE_MAP_ENTRY_ENTRY_1_8_SIZE2_GET(cnt[1]));
+    size[3] = (ELB_WA_CSR_DHS_LIF_QSTATE_MAP_ENTRY_ENTRY_1_8_SIZE3_GET(cnt[1]));
+    size[4] = (ELB_WA_CSR_DHS_LIF_QSTATE_MAP_ENTRY_ENTRY_2_8_SIZE4_2_1_GET(cnt[2])<<1)|ELB_WA_CSR_DHS_LIF_QSTATE_MAP_ENTRY_ENTRY_1_8_SIZE4_0_0_GET(cnt[1]);
+    size[5] = (ELB_WA_CSR_DHS_LIF_QSTATE_MAP_ENTRY_ENTRY_2_8_SIZE5_GET(cnt[2]));
+    size[6] = (ELB_WA_CSR_DHS_LIF_QSTATE_MAP_ENTRY_ENTRY_2_8_SIZE6_GET(cnt[2]));
+    size[7] = (ELB_WA_CSR_DHS_LIF_QSTATE_MAP_ENTRY_ENTRY_2_8_SIZE7_GET(cnt[2]));
+    // log2(number_of_queues)
+    length[0] = ELB_WA_CSR_DHS_LIF_QSTATE_MAP_ENTRY_ENTRY_0_8_LENGTH0_GET(cnt[0]);
+    length[1] = ELB_WA_CSR_DHS_LIF_QSTATE_MAP_ENTRY_ENTRY_1_8_LENGTH1_GET(cnt[1]);
+    length[2] = ELB_WA_CSR_DHS_LIF_QSTATE_MAP_ENTRY_ENTRY_1_8_LENGTH2_GET(cnt[1]);
+    length[3] = ELB_WA_CSR_DHS_LIF_QSTATE_MAP_ENTRY_ENTRY_1_8_LENGTH3_GET(cnt[1]);
+    length[4] = ELB_WA_CSR_DHS_LIF_QSTATE_MAP_ENTRY_ENTRY_1_8_LENGTH4_GET(cnt[1]);
+    length[5] = ELB_WA_CSR_DHS_LIF_QSTATE_MAP_ENTRY_ENTRY_2_8_LENGTH5_GET(cnt[2]);
+    length[6] = ELB_WA_CSR_DHS_LIF_QSTATE_MAP_ENTRY_ENTRY_2_8_LENGTH6_GET(cnt[2]);
+    length[7] = ELB_WA_CSR_DHS_LIF_QSTATE_MAP_ENTRY_ENTRY_2_8_LENGTH7_GET(cnt[2]);
+#endif
 
     base = base << 12;
 
@@ -79,6 +122,7 @@ get_lif_qstate(uint16_t lif, queue_info_t qinfo[QTYPE_MAX])
 
     return true;
 }
+
 
 std::string
 hal_cfg_path()

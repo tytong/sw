@@ -15,6 +15,10 @@
 #include <sys/types.h>
 #include "nic/sdk/lib/pal/pal.hpp"
 
+#define PLOG_API_MSG(f, ...) do {} while (0)
+#define PLOG_MSG(f, ...) do {} while (0)
+#define PLOG_ERR(f, ...) do {} while (0)
+
 #define SLEEP(t) usleep(t)
 
 static inline void

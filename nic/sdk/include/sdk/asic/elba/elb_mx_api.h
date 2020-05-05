@@ -67,22 +67,22 @@ void cap_bx_mac_stat(int chip_id, int inst_id, int ch, int short_report,
 int cap_bx_tx_drain(int chip_id, int inst_id, int mac_ch, bool drain);
 void cap_bx_stats_reset(int chip_id, int inst_id, int ch, int value);
 void cap_pp_sbus_write(int chip_id, int rcvr_addr,
-                       int data_addr, uint32_t data) ;
-uint32_t  cap_pp_sbus_read (int chip_id, int rcvr_addr, int data_addr) ;
-void  cap_pp_sbus_reset(int chip_id, int rcvr_addr) ;
+                       int data_addr, uint32_t data);
+uint32_t  cap_pp_sbus_read (int chip_id, int rcvr_addr, int data_addr);
+void  cap_pp_sbus_reset(int chip_id, int rcvr_addr);
 int  cap_mx_serdes_lpbk_get (int chip_id, int inst_id, int ch) ;
 void cap_mx_serdes_lpbk_set (int chip_id, int inst_id, int ch, int value) ;
-void cap_mx_stats_reset(int chip_id, int inst_id, int ch, int value) ;
+void cap_mx_stats_reset(int chip_id, int inst_id, int ch, int value);
 int cap_mx_set_pause(int chip_id, int inst_id, int ch, int pri_vec, int legacy,
-                     bool tx_pause_enable, bool rx_pause_enable) ;
-int cap_mx_set_pause_src_addr(int chip_id, int inst_id, int ch, uint8_t *mac_addr) ;
-int cap_mx_base_r_pcs_status2(int chip_id, int inst_id, int mac_ch) ;
-int cap_mx_base_r_pcs_status2_clear(int chip_id, int inst_id, int mac_ch) ;
+                     bool tx_pause_enable, bool rx_pause_enable);
+int cap_mx_set_pause_src_addr(int chip_id, int inst_id, int ch, uint8_t *mac_addr);
+int cap_mx_base_r_pcs_status2(int chip_id, int inst_id, int mac_ch);
+int cap_mx_base_r_pcs_status2_clear(int chip_id, int inst_id, int mac_ch);
 int cap_mx_send_remote_faults(int chip_id, int inst_id, int mac_ch,
-                              bool send) ;
-int cap_mx_tx_drain(int chip_id, int inst_id, int mac_ch, bool drain) ;
+                              bool send);
+int cap_mx_tx_drain(int chip_id, int inst_id, int mac_ch, bool drain);
 int cap_mx_set_vlan_check(int chip_id, int inst_id, int mac_ch,
                           int num_tags, uint32_t tag1, uint32_t tag2,
-                          uint32_t tag3) ;
+                          uint32_t tag3);
 
 #endif //   __SDK_LINKMGR_ELB_MX_API_H__
