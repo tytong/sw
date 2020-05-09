@@ -1,7 +1,7 @@
 /*****************************************************************************
  * storage_seq_p4_hdr.h: Defintions needed for storage sequencer P4+ program
  *****************************************************************************/
- 
+
 #ifndef STORAGE_SEQ_P4_HDR_H
 #define STORAGE_SEQ_P4_HDR_H
 
@@ -34,7 +34,7 @@ header_type seq_q_state_t {
     qgroup          : 8;    // user assigned queue group
     core_id         : 16;   // user assigned host core ID
     pad             : 184;
-                            // 
+                            //
     // When canceling a doorbell push DMA command that is also the last (EOP)
     // in the DMA command set, NOP can't be used due to the EOP. The
     // workaround is to convert the doorbell push into a PHV2MEM into
@@ -85,7 +85,7 @@ header_type seq_q_state_metrics2_t {
   }
 }
 
-// Barco ring 
+// Barco ring
 header_type barco_ring_t {
   fields {
     p_ndx           : 32;   // Producer Index
@@ -132,8 +132,8 @@ header_type seq_comp_status_desc0_t {
     intr_addr       : 64;   // Address where interrupt needs to be written
     intr_data       : 32;   // Data that needs to be written for interrupt
     status_len      : 16;   // Length of the compression status
-    status_offset0  : 8;    // Add this to status_addr0 before DMA into status_addr1 
-    status_dma_en   : 1;    // 1 => DMA status, 0 => don't DMA 
+    status_offset0  : 8;    // Add this to status_addr0 before DMA into status_addr1
+    status_dma_en   : 1;    // 1 => DMA status, 0 => don't DMA
     next_db_en      : 1;    // 1 => Ring next sequencer doorbell, 0 => don't ring
     intr_en         : 1;    // 1 => Fire the MSI-X interrupt, 0 => don't fire
                             // NOTE: Don't enable intr_en and next_db_en together
@@ -144,7 +144,7 @@ header_type seq_comp_status_desc0_t {
     rate_limit_dst_en: 1;   // (PDMA) destination rate limiting applicable
     rate_limit_en   : 1;    // overall rate limiting enable
     rsvd0           : 25;
-    num_alt_descs   : 5;    // number of alternate descriptors 
+    num_alt_descs   : 5;    // number of alternate descriptors
     rsvd1           : 3;
   }
 }
@@ -157,7 +157,7 @@ header_type seq_comp_status_desc1_t {
     aol_src_vec_addr: 64;   // for compress-pad-encrypt: source AOL vector for encrypt
     aol_dst_vec_addr: 64;   // for compress-pad-encrypt: destination AOL vector for encrypt;
                             // otherwise, aol_dst_vec_addr is used as SGL destination
-                            // for SGL PDMA transfer (if sgl_pdma_en is set) 
+                            // for SGL PDMA transfer (if sgl_pdma_en is set)
     sgl_vec_addr    : 64;   // SGL vector for padding operation
     pad_buf_addr    : 64;   // pad buffer address
     alt_buf_addr    : 64;   // Alternate source data buffer address for SGL PDMA in error condition
@@ -166,7 +166,7 @@ header_type seq_comp_status_desc1_t {
     rsvd0           : 16;
     pad_boundary_shift: 5;  // log2(padding boundray)
     stop_chain_on_error: 1; // 1 => don't ring next DB on error
-    data_len_from_desc : 1; // 1 => Use data_len in the descriptor, 
+    data_len_from_desc : 1; // 1 => Use data_len in the descriptor,
                             // 0 => Use the comp_output_data_len
     aol_update_en   : 1;
     sgl_update_en   : 1;
@@ -241,8 +241,8 @@ header_type seq_xts_status_desc0_t {
     intr_addr       : 64;   // Address where interrupt needs to be written
     intr_data       : 32;   // Data that needs to be written for interrupt
     status_len      : 16;   // Length of the crypto status
-    status_offset0  : 8;    // Add this to status_addr0 before DMA into status_addr1 
-    status_dma_en   : 1;    // 1 => DMA status, 0 => don't DMA 
+    status_offset0  : 8;    // Add this to status_addr0 before DMA into status_addr1
+    status_dma_en   : 1;    // 1 => DMA status, 0 => don't DMA
     next_db_en      : 1;    // 1 => Ring next sequencer doorbell, 0 => don't ring
     intr_en         : 1;    // 1 => Fire the MSI-X interrupt, 0 => don't fire
                             // NOTE: Don't enable intr_en and next_db_en together
@@ -316,6 +316,107 @@ header_type barco_aol_t {
 }
 
 // Barco SGL (used by comp/decomp engines)
+#ifdef ELBA
+header_type barco_sgl_t {
+  fields {
+    addr0           : 64;   // SGL data buffer 0 address
+    rsvd0           : 32;
+    len0            : 32;   // SGL data buffer 0 length
+    addr1           : 64;   // SGL data buffer 1 address
+    rsvd1           : 32;
+    len1            : 32;   // SGL data buffer 1 length
+    addr2           : 64;   // SGL data buffer 2 address
+    rsvd2           : 32;
+    len2            : 32;   // SGL data buffer 2 length
+    link            : 64;
+    rsvd            : 64;
+  }
+}
+
+// When a packed Barco SGL is being padded where the last block
+// lands in tuple 0 and the padding in tuple 1, this is what
+// the resulting PHV layout will look like, with tuple 2 and
+// the link field getting nullified.
+header_type barco_sgl_tuple0_pad_t {
+  fields {
+    last_blk_len    : 32;
+    pad_buf_addr    : 64;
+    rsvd1           : 32;
+    pad_len         : 32;
+    null_addr2      : 64;
+    null_rsvd2      : 32;
+    null_len2       : 32;
+    link            : 64;
+  }
+}
+
+// When a packed Barco SGL is being padded where the last block
+// lands in tuple 1 and the padding in tuple 2, this is what
+// the resulting PHV layout will look like, with just the link
+// field getting nullified.
+header_type barco_sgl_tuple1_pad_t {
+  fields {
+    last_blk_len    : 32;
+    pad_buf_addr    : 64;
+    rsvd2           : 32;
+    pad_len         : 32;
+    link            : 64;
+  }
+}
+
+// When a packed Barco SGL is being padded where the last block
+// lands in tuple 2, padding has to occur in tuple 0 of the next
+// adjacent SGL. In order to save flit space, we'll do the padding
+// with 2 PHV2MEM: the first separately updates A2 len, and the next
+// writes the entire subsequent SGL, as follows:.
+header_type barco_sgl_tuple2_pad_t {
+  fields {
+    pad_buf_addr    : 64;
+    rsvd0           : 32;
+    pad_len         : 32;
+    null_addr1      : 64;
+    null_rsvd1      : 32;
+    null_len1       : 32;
+    null_addr2      : 64;
+    null_rsvd2      : 32;
+    null_len2       : 32;
+    link            : 64;
+  }
+}
+
+// Similar to above structures, the following SGLs are used when the
+// length in the last block needs to be updated, but without padding.
+header_type barco_sgl_tuple0_len_update_t {
+  fields {
+    last_blk_len    : 32;
+    null_addr1      : 64;
+    null_rsvd1      : 32;
+    null_len1       : 32;
+    null_addr2      : 64;
+    null_rsvd2      : 32;
+    null_len2       : 32;
+    link            : 64;
+  }
+}
+
+header_type barco_sgl_tuple1_len_update_t {
+  fields {
+    last_blk_len    : 32;
+    null_addr2      : 64;
+    null_rsvd2      : 32;
+    null_len2       : 32;
+    link            : 64;
+  }
+}
+
+header_type barco_sgl_tuple2_len_update_t {
+  fields {
+    last_blk_len    : 32;
+    rsvd2           : 32;
+    link            : 64;
+  }
+}
+#else
 header_type barco_sgl_t {
   fields {
     addr0           : 64;   // SGL data buffer 0 address
@@ -419,6 +520,7 @@ header_type barco_sgl_tuple2_len_update_t {
     link            : 64;
   }
 }
+#endif
 
 // PHV pad structures
 
@@ -514,7 +616,7 @@ header_type seq_kivec5_t {
   fields {
     src_qaddr           : 34;   // must be in same field position as seq_kivec5xts_t
     pad_buf_addr        : 34;   // pad buffer in HBM
-    data_len            : 17;   // Length of compression data (either from descriptor or 
+    data_len            : 17;   // Length of compression data (either from descriptor or
                                 // from the compression status)
     alt_data_len        : 17;   // Length of alternate data
     status_dma_en       : 1;    // 1 => DMA status, 0 => don't DMA status
@@ -525,7 +627,7 @@ header_type seq_kivec5_t {
     rate_limit_dst_en   : 1;
     rate_limit_en       : 1;
     stop_chain_on_error : 1;
-    data_len_from_desc  : 1;    // 1 => Use the data length in the descriptor, 
+    data_len_from_desc  : 1;    // 1 => Use the data length in the descriptor,
                                 // 0 => Use the data lenghth in the status
     aol_update_en       : 1;
     sgl_update_en       : 1;
@@ -636,7 +738,7 @@ header_type seq_kivec9_t {
 header_type seq_kivec10_t {
   fields {
       intr_addr        : 64;   // Interrupt assert address
-      num_alt_descs    : 5;    // number of alternate descriptors 
+      num_alt_descs    : 5;    // number of alternate descriptors
       alt_descs_select : 1;
   }
 }
@@ -664,7 +766,7 @@ header_type seq_kivec10_t {
   modify_field(q_state.enable, enable);                                 \
   modify_field(q_state.abort, abort);                                   \
   modify_field(q_state.desc1_next_pc_valid, desc1_next_pc_valid);       \
-  
+
 #define SEQ_Q_STATE_COPY(q_state)                                       \
   SEQ_Q_STATE_COPY_STAGE0(q_state)                                      \
   modify_field(q_state.pad, pad);                                       \
@@ -771,7 +873,7 @@ header_type seq_kivec10_t {
 #define SEQ_KIVEC8_USE(scratch, kivec)                                  \
   modify_field(scratch.alt_buf_addr, kivec.alt_buf_addr);               \
   modify_field(scratch.alt_buf_addr_en, kivec.alt_buf_addr_en);         \
-  
+
 #define SEQ_KIVEC9_USE(scratch, kivec)                                  \
   modify_field(scratch.metrics0_start, kivec.metrics0_start);           \
   modify_field(scratch.interrupts_raised, kivec.interrupts_raised);     \
@@ -798,7 +900,7 @@ header_type seq_kivec10_t {
   modify_field(scratch.cp_header_updates, kivec.cp_header_updates);     \
   modify_field(scratch.seq_hw_bytes, kivec.seq_hw_bytes);               \
   modify_field(scratch.metrics2_end, kivec.metrics2_end);               \
-  
+
 #define SEQ_KIVEC10_USE(scratch, kivec)                                 \
   modify_field(scratch.intr_addr, kivec.intr_addr);                     \
   modify_field(scratch.num_alt_descs, kivec.num_alt_descs);             \

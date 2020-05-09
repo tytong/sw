@@ -57,8 +57,8 @@
 
 
 /*****************************************************************************
- * Storage Sequencer PHV layout BEGIN 
- * Will be processed by NCC in this order 
+ * Storage Sequencer PHV layout BEGIN
+ * Will be processed by NCC in this order
  *****************************************************************************/
 
 // Global and stage to stage K+I vectors
@@ -264,7 +264,7 @@ metadata dma_cmd_mem2mem_t dma_m2m_19;
 
 
 /*****************************************************************************
- * Storage Sequencer PHV layout END 
+ * Storage Sequencer PHV layout END
  *****************************************************************************/
 
 
@@ -377,7 +377,7 @@ metadata seq_q_state_metrics2_t seq_metrics2;
  *****************************************************************************/
 
 /*****************************************************************************
- * exit: Exit action handler needs to be stubbed out for NCC 
+ * exit: Exit action handler needs to be stubbed out for NCC
  *****************************************************************************/
 
 action exit() {
@@ -385,12 +385,12 @@ action exit() {
 
 
 /*****************************************************************************
- *  seq_q_state_pop : Check the queue state and see if there's anything to be 
+ *  seq_q_state_pop : Check the queue state and see if there's anything to be
  *                    popped. If so increment the working index and load the
  *                    queue entry.
  *****************************************************************************/
 @pragma little_endian p_ndx c_ndx
-action seq_q_state_pop(/*pc_offset, */rsvd, cosA, cosB, cos_sel, eval_last, 
+action seq_q_state_pop(/*pc_offset, */rsvd, cosA, cosB, cos_sel, eval_last,
                        host_rings, total_rings, pid, p_ndx, c_ndx, w_ndx,
                        num_entries, base_addr, entry_size, next_pc,
                        desc1_next_pc, enable, abort, desc1_next_pc_valid, pad) {
@@ -404,7 +404,7 @@ action seq_q_state_pop(/*pc_offset, */rsvd, cosA, cosB, cos_sel, eval_last,
   } else {
     // Increment the working consumer index. In ASM this should be a table write.
     QUEUE_POP(q_state_scratch)
-   
+
     // In ASM, derive these from the K+I for stage 0
     modify_field(seq_kivec1.src_qaddr, 0);
     modify_field(seq_kivec1.src_lif, 0);
@@ -420,12 +420,12 @@ action seq_q_state_pop(/*pc_offset, */rsvd, cosA, cosB, cos_sel, eval_last,
 
 /*****************************************************************************
  *  seq_barco_entry_handler: Handle sequencer descriptor. Form the
- *                           DMA command to copy the HW descriptor as 
+ *                           DMA command to copy the HW descriptor as
  *                           part of the push operation in the next stage.
  *****************************************************************************/
 
 action seq_barco_entry_handler(barco_desc_addr, barco_pndx_addr, barco_pndx_shadow_addr,
-			       barco_ring_addr, barco_desc_size, barco_pndx_size, 
+			       barco_ring_addr, barco_desc_size, barco_pndx_size,
 			       barco_ring_size, batch_mode, rate_limit_src_en,
 			       rate_limit_dst_en, rate_limit_en, rsvd0,
 			       batch_size, rsvd1,
@@ -452,12 +452,12 @@ action seq_barco_entry_handler(barco_desc_addr, barco_pndx_addr, barco_pndx_shad
   modify_field(seq_desc_entry_scratch.src_data_len, src_data_len);
   modify_field(seq_desc_entry_scratch.dst_data_len, dst_data_len);
 
-  // Update the K+I vector with the HW descriptor size to be used 
-  // when calculating the offset for the push operation 
+  // Update the K+I vector with the HW descriptor size to be used
+  // when calculating the offset for the push operation
   modify_field(seq_kivec4.barco_desc_size, seq_desc_entry_scratch.barco_desc_size);
   modify_field(seq_kivec4.barco_ring_size, seq_desc_entry_scratch.barco_ring_size);
 
-  // Form the doorbell and setup the DMA command to pop the entry by writing 
+  // Form the doorbell and setup the DMA command to pop the entry by writing
   // w_ndx to c_ndx
   //QUEUE_POP_DOORBELL_UPDATE
 
@@ -466,12 +466,12 @@ action seq_barco_entry_handler(barco_desc_addr, barco_pndx_addr, barco_pndx_shad
   DMA_COMMAND_MEM2MEM_FILL(dma_m2m_1, dma_m2m_2, seq_desc_entry_scratch.barco_desc_addr, 0,
                            0, 0, seq_desc_entry_scratch.barco_desc_size, 0, 0, 0)
 
-  // Setup the doorbell to be rung based on a fence with the previous mem2mem 
-  // DMA. Form the doorbell DMA command in this stage as opposed the push 
+  // Setup the doorbell to be rung based on a fence with the previous mem2mem
+  // DMA. Form the doorbell DMA command in this stage as opposed the push
   // stage (as is the norm) to avoid carrying the doorbell address in K+I
   // vector.
   modify_field(doorbell_addr_scratch.addr, seq_desc_entry_scratch.barco_pndx_addr);
-  DMA_COMMAND_PHV2MEM_FILL(dma_p2m_3, 
+  DMA_COMMAND_PHV2MEM_FILL(dma_p2m_3,
                            0,
                            PHV_FIELD_OFFSET(qpush_doorbell_data.data),
                            PHV_FIELD_OFFSET(qpush_doorbell_data.data),
@@ -501,19 +501,19 @@ action seq_barco_ring_pndx_read() {
 
   // Store the K+I vector into scratch to get the K+I generated correctly
   SEQ_KIVEC4_USE(seq_kivec4_scratch, seq_kivec4)
-  
+
   // Load the Barco ring for the next stage to push the Barco descriptor
-  CAPRI_LOAD_TABLE_ADDR(common_te0_phv, 
+  CAPRI_LOAD_TABLE_ADDR(common_te0_phv,
                         seq_kivec4.barco_pndx_shadow_addr,
-                        seq_kivec4.barco_pndx_size, 
+                        seq_kivec4.barco_pndx_size,
                         seq_barco_chain_action_start)
 }
 
 /*****************************************************************************
- *  seq_comp_status_desc0_handler: Handle the compression status descriptor entry in the 
+ *  seq_comp_status_desc0_handler: Handle the compression status descriptor entry in the
  *                         sequencer. This involves:
  *                          1. processing status to see if operation succeeded
- *                          2. breaking up the compressed data into the 
+ *                          2. breaking up the compressed data into the
  *                             destination SGL provided in the descriptor
  *                         In this stage, load the status entry for next stage
  *                         and save the other fields into I vector.
@@ -526,7 +526,7 @@ action seq_comp_status_desc0_handler(next_db_addr, next_db_data,
                                      barco_desc_size, barco_pndx_size, barco_ring_size,
                                      barco_num_descs,
                                      status_addr0, status_addr1,
-                                     intr_addr, intr_data, status_len, 
+                                     intr_addr, intr_data, status_len,
 				     status_offset0, status_dma_en,
                                      next_db_en, intr_en,
 				     next_db_action_barco_push, rate_limit_src_en,
@@ -586,7 +586,7 @@ action seq_comp_status_desc0_handler(next_db_addr, next_db_data,
     // Copy the doorbell addr and data
     modify_field(doorbell_addr_scratch.addr, seq_comp_status_desc0_scratch.next_db_addr);
     modify_field(seq_doorbell_data.data, seq_comp_status_desc0_scratch.next_db_addr);
-    DMA_COMMAND_PHV2MEM_FILL(dma_p2m_11, 
+    DMA_COMMAND_PHV2MEM_FILL(dma_p2m_11,
                              0,
                              PHV_FIELD_OFFSET(seq_doorbell_data.data),
                              PHV_FIELD_OFFSET(seq_doorbell_data.data),
@@ -596,27 +596,27 @@ action seq_comp_status_desc0_handler(next_db_addr, next_db_data,
   // Fire the interrupt if there is no doorbell to be rung and if the
   // interrupt enabled bit is set. Fence with the SGL mem2mem DMA
   // for ordering.
-  if ((seq_comp_status_desc0_scratch.next_db_en ==  0) and 
+  if ((seq_comp_status_desc0_scratch.next_db_en ==  0) and
       (seq_comp_status_desc0_scratch.intr_en == 1)) {
     // Copy the doorbell addr and data
     modify_field(pci_intr_addr_scratch.addr, seq_comp_status_desc0_scratch.intr_addr);
     modify_field(pci_intr_data.data, seq_comp_status_desc0_scratch.intr_data);
-    DMA_COMMAND_PHV2MEM_FILL(dma_p2m_11, 
+    DMA_COMMAND_PHV2MEM_FILL(dma_p2m_11,
                              0,
                              PHV_FIELD_OFFSET(pci_intr_data.data),
                              PHV_FIELD_OFFSET(pci_intr_data.data),
                              0, 0, 0, 0)
   }
 
-  // Form the doorbell and setup the DMA command to pop the entry by writing 
+  // Form the doorbell and setup the DMA command to pop the entry by writing
   // w_ndx to c_ndx
   //QUEUE_POP_DOORBELL_UPDATE
 
-  // Load the address where compression status is stored for processing 
+  // Load the address where compression status is stored for processing
   // in the next stage
-  CAPRI_LOAD_TABLE_ADDR(common_te0_phv, 
+  CAPRI_LOAD_TABLE_ADDR(common_te0_phv,
                         seq_comp_status_desc0_scratch.status_addr0,
-                        STORAGE_DEFAULT_TBL_LOAD_SIZE, 
+                        STORAGE_DEFAULT_TBL_LOAD_SIZE,
                         seq_comp_status_handler_start)
 }
 
@@ -626,7 +626,7 @@ action seq_comp_status_desc0_handler(next_db_addr, next_db_data,
 
 //@pragma little_endian rsvd comp_buf_addr aol_src_vec_addr aol_dst_vec_addr data_len sgl_vec_addr pad_buf_addr alt_buf_addr
 @pragma little_endian hdr_version
-action seq_comp_status_desc1_handler(comp_buf_addr, aol_src_vec_addr, aol_dst_vec_addr, 
+action seq_comp_status_desc1_handler(comp_buf_addr, aol_src_vec_addr, aol_dst_vec_addr,
                                      sgl_vec_addr, pad_buf_addr, alt_buf_addr,
                                      data_len, hdr_version, rsvd0,
                                      pad_boundary_shift, stop_chain_on_error,
@@ -638,7 +638,7 @@ action seq_comp_status_desc1_handler(comp_buf_addr, aol_src_vec_addr, aol_dst_ve
 				     hdr_version_wr_en, cp_hdr_update_en,
 				     status_len_no_hdr, padding_en,
 				     rsvd1, alt_data_len) {
- 
+
   // Store the K+I vector into scratch to get the K+I generated correctly
   SEQ_KIVEC5_USE(seq_kivec5_scratch, seq_kivec5)
 
@@ -726,18 +726,18 @@ action seq_comp_status_handler(status, output_data_len, partial_data,
     modify_field(seq_kivec5.data_len, seq_comp_status_scratch.output_data_len);
   }
 
-  // Load the address where compression destination SGL is stored for 
+  // Load the address where compression destination SGL is stored for
   // processing in the next stage
-  CAPRI_LOAD_TABLE_ADDR(common_te1_phv, 
+  CAPRI_LOAD_TABLE_ADDR(common_te1_phv,
                         seq_kivec2.sgl_pdma_dst_addr,
-                        STORAGE_DEFAULT_TBL_LOAD_SIZE, 
+                        STORAGE_DEFAULT_TBL_LOAD_SIZE,
                         seq_comp_sgl_pdma_xfer_start)
 }
 
 /*****************************************************************************
- *  seq_barco_chain_action: Push to Barco ring by issuing the mem2mem DMA 
- *                          commands and incrementing the p_ndx via ringing the 
- *                          doorbell. Assumes that data to be pushed has its 
+ *  seq_barco_chain_action: Push to Barco ring by issuing the mem2mem DMA
+ *                          commands and incrementing the p_ndx via ringing the
+ *                          doorbell. Assumes that data to be pushed has its
  *                          source in DMA cmd 1 and destination in DMA cmd 2.
  *****************************************************************************/
 
@@ -754,12 +754,12 @@ action seq_barco_chain_action(p_ndx) {
   // Copy the doorbell data to PHV
   modify_field(barco_doorbell_data.p_ndx, barco_ring_scratch.p_ndx);
 
-  // Modify the DMA command 2 to fill the destination address based on p_ndx 
+  // Modify the DMA command 2 to fill the destination address based on p_ndx
   // NOTE: This API in P4 land will not work, but in ASM we can selectively
   // overwrite the fields
-  DMA_COMMAND_PHV2MEM_FILL(dma_m2m_10, 
+  DMA_COMMAND_PHV2MEM_FILL(dma_m2m_10,
                            seq_kivec4.barco_ring_addr +
-                           (barco_ring_scratch.p_ndx * 
+                           (barco_ring_scratch.p_ndx *
                             seq_kivec4.barco_desc_size),
                            0, 0,
                            0, 0, 0, 0)
@@ -767,7 +767,7 @@ action seq_barco_chain_action(p_ndx) {
 
   // Doorbell has already been setup
 
-  // Exit the pipeline here 
+  // Exit the pipeline here
 }
 
 /*****************************************************************************
@@ -786,7 +786,7 @@ action seq_comp_db_intr_override() {
  *                          comp_buf_addr.
  *****************************************************************************/
 
-@pragma little_endian addr0 addr1 addr2 addr3 len0 len1 len2 len3 
+@pragma little_endian addr0 addr1 addr2 addr3 len0 len1 len2 len3
 action seq_comp_sgl_pdma_xfer(addr0, len0, addr1, len1,
                               addr2, len2, addr3, len3,
                               pad0, pad1) {
@@ -810,73 +810,73 @@ action seq_comp_sgl_pdma_xfer(addr0, len0, addr1, len1,
 
   // DMA to SGL 0
   if (seq_kivec5.data_len <= seq_comp_sgl_scratch.len0) {
-    DMA_COMMAND_MEM2MEM_FILL(dma_m2m_2, dma_m2m_3, 
+    DMA_COMMAND_MEM2MEM_FILL(dma_m2m_2, dma_m2m_3,
                              seq_kivec3.comp_buf_addr, 0,
                              seq_comp_sgl_scratch.addr0, 0,
                              seq_kivec5.data_len,
                              0, 0, 0)
     exit();
   } else {
-    DMA_COMMAND_MEM2MEM_FILL(dma_m2m_2, dma_m2m_3, 
+    DMA_COMMAND_MEM2MEM_FILL(dma_m2m_2, dma_m2m_3,
                              seq_kivec3.comp_buf_addr, 0,
                              seq_comp_sgl_scratch.addr0, 0,
                              seq_comp_sgl_scratch.len0,
                              0, 0, 0)
-    modify_field(seq_kivec5.data_len, 
+    modify_field(seq_kivec5.data_len,
                  (seq_kivec5.data_len - seq_comp_sgl_scratch.len0));
   }
 
   // DMA to SGL 1
   if (seq_kivec5.data_len <= seq_comp_sgl_scratch.len1) {
-    DMA_COMMAND_MEM2MEM_FILL(dma_m2m_4, dma_m2m_5, 
+    DMA_COMMAND_MEM2MEM_FILL(dma_m2m_4, dma_m2m_5,
                              seq_kivec3.comp_buf_addr, 0,
                              seq_comp_sgl_scratch.addr1, 0,
                              seq_kivec5.data_len,
                              0, 0, 0)
     exit();
   } else {
-    DMA_COMMAND_MEM2MEM_FILL(dma_m2m_4, dma_m2m_5, 
+    DMA_COMMAND_MEM2MEM_FILL(dma_m2m_4, dma_m2m_5,
                              seq_kivec3.comp_buf_addr, 0,
                              seq_comp_sgl_scratch.addr1, 0,
                              seq_comp_sgl_scratch.len1,
                              0, 0, 0)
-    modify_field(seq_kivec5.data_len, 
+    modify_field(seq_kivec5.data_len,
                  (seq_kivec5.data_len - seq_comp_sgl_scratch.len1));
   }
 
   // DMA to SGL 2
   if (seq_kivec5.data_len <= seq_comp_sgl_scratch.len2) {
-    DMA_COMMAND_MEM2MEM_FILL(dma_m2m_6, dma_m2m_7, 
+    DMA_COMMAND_MEM2MEM_FILL(dma_m2m_6, dma_m2m_7,
                              seq_kivec3.comp_buf_addr, 0,
                              seq_comp_sgl_scratch.addr2, 0,
                              seq_kivec5.data_len,
                              0, 0, 0)
     exit();
   } else {
-    DMA_COMMAND_MEM2MEM_FILL(dma_m2m_6, dma_m2m_7, 
+    DMA_COMMAND_MEM2MEM_FILL(dma_m2m_6, dma_m2m_7,
                              seq_kivec3.comp_buf_addr, 0,
                              seq_comp_sgl_scratch.addr2, 0,
                              seq_comp_sgl_scratch.len2,
                              0, 0, 0)
-    modify_field(seq_kivec5.data_len, 
+    modify_field(seq_kivec5.data_len,
                  (seq_kivec5.data_len - seq_comp_sgl_scratch.len2));
   }
 
   // DMA to SGL 3
   if (seq_kivec5.data_len <= seq_comp_sgl_scratch.len3) {
-    DMA_COMMAND_MEM2MEM_FILL(dma_m2m_8, dma_m2m_9, 
+    DMA_COMMAND_MEM2MEM_FILL(dma_m2m_8, dma_m2m_9,
                              seq_kivec3.comp_buf_addr, 0,
                              seq_comp_sgl_scratch.addr3, 0,
                              seq_kivec5.data_len,
                              0, 0, 0)
     exit();
   } else {
-    DMA_COMMAND_MEM2MEM_FILL(dma_m2m_8, dma_m2m_9, 
+    DMA_COMMAND_MEM2MEM_FILL(dma_m2m_8, dma_m2m_9,
                              seq_kivec3.comp_buf_addr, 0,
                              seq_comp_sgl_scratch.addr3, 0,
                              seq_comp_sgl_scratch.len3,
                              0, 0, 0)
-    modify_field(seq_kivec5.data_len, 
+    modify_field(seq_kivec5.data_len,
                  (seq_kivec5.data_len - seq_comp_sgl_scratch.len3));
   }
 
@@ -885,14 +885,21 @@ action seq_comp_sgl_pdma_xfer(addr0, len0, addr1, len1,
 
 
 /*****************************************************************************
- *  seq_comp_sgl_pad_only: DMA only padding data to 
+ *  seq_comp_sgl_pad_only: DMA only padding data to
  *****************************************************************************/
 
 @pragma little_endian addr0 addr1 addr2 len0 len1 len2 link
+#ifdef ELBA
+action seq_comp_sgl_pad_only_xfer(addr0, rsvd0, len0,
+                                  addr1, rsvd1, len1,
+                                  addr2, rsvd2, len2,
+                                  link, rsvd) {
+#else
 action seq_comp_sgl_pad_only_xfer(addr0, len0, rsvd0,
                                   addr1, len1, rsvd1,
                                   addr2, len2, rsvd2,
                                   link, rsvd) {
+#endif
 
   // Store the K+I vector into scratch to get the K+I generated correctly
   SEQ_KIVEC3_USE(seq_kivec3_scratch, seq_kivec3)
@@ -913,21 +920,21 @@ action seq_comp_sgl_pad_only_xfer(addr0, len0, rsvd0,
 
   if (seq_kivec3.pad_len > 0) {
     if (seq_kivec3.sgl_tuple_no == 0) {
-      DMA_COMMAND_MEM2MEM_FILL(dma_m2m_4, dma_m2m_5, 
+      DMA_COMMAND_MEM2MEM_FILL(dma_m2m_4, dma_m2m_5,
                                seq_kivec5.pad_buf_addr, 0,
                                barco_sgl_scratch.addr0 +  seq_kivec3.last_blk_len,
                                0, seq_kivec3.pad_len,
                                0, 0, 0)
     }
     if (seq_kivec3.sgl_tuple_no == 1) {
-      DMA_COMMAND_MEM2MEM_FILL(dma_m2m_4, dma_m2m_5, 
+      DMA_COMMAND_MEM2MEM_FILL(dma_m2m_4, dma_m2m_5,
                                seq_kivec5.pad_buf_addr, 0,
                                barco_sgl_scratch.addr1 +  seq_kivec3.last_blk_len,
                                0, seq_kivec3.pad_len,
                                0, 0, 0)
     }
     if (seq_kivec3.sgl_tuple_no == 2) {
-      DMA_COMMAND_MEM2MEM_FILL(dma_m2m_4, dma_m2m_5, 
+      DMA_COMMAND_MEM2MEM_FILL(dma_m2m_4, dma_m2m_5,
                                seq_kivec5.pad_buf_addr, 0,
                                barco_sgl_scratch.addr2 +  seq_kivec3.last_blk_len,
                                0, seq_kivec3.pad_len,
@@ -952,7 +959,7 @@ action seq_comp_aol_pad_handler() {
 }
 
 /*****************************************************************************
- *  seq_xts_status_desc0_handler: Handle the XTS status descriptor entry in the 
+ *  seq_xts_status_desc0_handler: Handle the XTS status descriptor entry in the
  *                                sequencer.
  *****************************************************************************/
 
@@ -962,8 +969,8 @@ action seq_xts_status_desc0_handler(next_db_addr, next_db_data,
                                     barco_pndx_addr, barco_pndx_shadow_addr,
                                     barco_desc_size, barco_pndx_size, barco_ring_size,
                                     barco_num_descs,
-                                    status_addr0, status_addr1, 
-                                    intr_addr, intr_data, status_len, 
+                                    status_addr0, status_addr1,
+                                    intr_addr, intr_data, status_len,
 				    status_offset0, status_dma_en,
                                     next_db_en, intr_en,
 				    next_db_action_barco_push, rate_limit_src_en,
@@ -1018,7 +1025,7 @@ action seq_xts_status_desc0_handler(next_db_addr, next_db_data,
     // Copy the doorbell addr and data
     modify_field(doorbell_addr_scratch.addr, seq_xts_status_desc0_scratch.next_db_addr);
     modify_field(seq_doorbell_data.data, seq_xts_status_desc0_scratch.next_db_addr);
-    DMA_COMMAND_PHV2MEM_FILL(dma_p2m_11, 
+    DMA_COMMAND_PHV2MEM_FILL(dma_p2m_11,
                              0,
                              PHV_FIELD_OFFSET(seq_doorbell_data.data),
                              PHV_FIELD_OFFSET(seq_doorbell_data.data),
@@ -1028,27 +1035,27 @@ action seq_xts_status_desc0_handler(next_db_addr, next_db_data,
   // Fire the interrupt if there is no doorbell to be rung and if the
   // interrupt enabled bit is set. Fence with the SGL mem2mem DMA
   // for ordering.
-  if ((seq_xts_status_desc0_scratch.next_db_en ==  0) and 
+  if ((seq_xts_status_desc0_scratch.next_db_en ==  0) and
       (seq_xts_status_desc0_scratch.intr_en == 1)) {
     // Copy the doorbell addr and data
     modify_field(pci_intr_addr_scratch.addr, seq_xts_status_desc0_scratch.intr_addr);
     modify_field(pci_intr_data.data, seq_xts_status_desc0_scratch.intr_data);
-    DMA_COMMAND_PHV2MEM_FILL(dma_p2m_11, 
+    DMA_COMMAND_PHV2MEM_FILL(dma_p2m_11,
                              0,
                              PHV_FIELD_OFFSET(pci_intr_data.data),
                              PHV_FIELD_OFFSET(pci_intr_data.data),
                              0, 0, 0, 0)
   }
 
-  // Form the doorbell and setup the DMA command to pop the entry by writing 
+  // Form the doorbell and setup the DMA command to pop the entry by writing
   // w_ndx to c_ndx
   //QUEUE_POP_DOORBELL_UPDATE
 
-  // Load the address where compression status is stored for processing 
+  // Load the address where compression status is stored for processing
   // in the next stage
-  CAPRI_LOAD_TABLE_ADDR(common_te0_phv, 
+  CAPRI_LOAD_TABLE_ADDR(common_te0_phv,
                         seq_xts_status_desc0_scratch.status_addr0,
-                        STORAGE_TBL_LOAD_SIZE_64_BITS, 
+                        STORAGE_TBL_LOAD_SIZE_64_BITS,
                         seq_xts_status_handler_start)
 }
 
@@ -1062,7 +1069,7 @@ action seq_xts_status_desc1_handler(comp_sgl_src_addr, sgl_pdma_dst_addr, decr_b
                                     comp_len_update_en, comp_sgl_src_en, comp_sgl_src_vec_en,
 				    sgl_sparse_format_en, sgl_pdma_en, sgl_pdma_len_from_desc,
 				    desc_vec_push_en) {
- 
+
   // Store the K+I vector into scratch to get the K+I generated correctly
   SEQ_KIVEC5XTS_USE(seq_kivec5xts_scratch, seq_kivec5xts)
   SEQ_KIVEC8_USE(seq_kivec8_scratch, seq_kivec8)
@@ -1118,7 +1125,7 @@ action seq_xts_status_handler(err) {
  *                         decr_buf_addr.
  *****************************************************************************/
 
-@pragma little_endian addr0 addr1 addr2 addr3 len0 len1 len2 len3 
+@pragma little_endian addr0 addr1 addr2 addr3 len0 len1 len2 len3
 action seq_xts_sgl_pdma_xfer(addr0, len0, addr1, len1,
                              addr2, len2, addr3, len3,
                              pad0, pad1) {
@@ -1142,73 +1149,73 @@ action seq_xts_sgl_pdma_xfer(addr0, len0, addr1, len1,
 
   // DMA to SGL 0
   if (seq_kivec5xts.data_len <= seq_xts_sgl_scratch.len0) {
-    DMA_COMMAND_MEM2MEM_FILL(dma_m2m_6, dma_m2m_7, 
+    DMA_COMMAND_MEM2MEM_FILL(dma_m2m_6, dma_m2m_7,
                              seq_kivec3xts.decr_buf_addr, 0,
                              seq_xts_sgl_scratch.addr0, 0,
                              seq_kivec5xts.data_len,
                              0, 0, 0)
     exit();
   } else {
-    DMA_COMMAND_MEM2MEM_FILL(dma_m2m_6, dma_m2m_7, 
+    DMA_COMMAND_MEM2MEM_FILL(dma_m2m_6, dma_m2m_7,
                              seq_kivec3xts.decr_buf_addr, 0,
                              seq_xts_sgl_scratch.addr0, 0,
                              seq_xts_sgl_scratch.len0,
                              0, 0, 0)
-    modify_field(seq_kivec5xts.data_len, 
+    modify_field(seq_kivec5xts.data_len,
                  (seq_kivec5xts.data_len - seq_xts_sgl_scratch.len0));
   }
 
   // DMA to SGL 1
   if (seq_kivec5xts.data_len <= seq_xts_sgl_scratch.len1) {
-    DMA_COMMAND_MEM2MEM_FILL(dma_m2m_8, dma_m2m_9, 
+    DMA_COMMAND_MEM2MEM_FILL(dma_m2m_8, dma_m2m_9,
                              seq_kivec3xts.decr_buf_addr, 0,
                              seq_xts_sgl_scratch.addr1, 0,
                              seq_kivec5xts.data_len,
                              0, 0, 0)
     exit();
   } else {
-    DMA_COMMAND_MEM2MEM_FILL(dma_m2m_8, dma_m2m_9, 
+    DMA_COMMAND_MEM2MEM_FILL(dma_m2m_8, dma_m2m_9,
                              seq_kivec3xts.decr_buf_addr, 0,
                              seq_xts_sgl_scratch.addr1, 0,
                              seq_xts_sgl_scratch.len1,
                              0, 0, 0)
-    modify_field(seq_kivec5xts.data_len, 
+    modify_field(seq_kivec5xts.data_len,
                  (seq_kivec5xts.data_len - seq_xts_sgl_scratch.len1));
   }
 
   // DMA to SGL 2
   if (seq_kivec5xts.data_len <= seq_xts_sgl_scratch.len2) {
-    DMA_COMMAND_MEM2MEM_FILL(dma_m2m_10, dma_m2m_11, 
+    DMA_COMMAND_MEM2MEM_FILL(dma_m2m_10, dma_m2m_11,
                              seq_kivec3xts.decr_buf_addr, 0,
                              seq_xts_sgl_scratch.addr2, 0,
                              seq_kivec5xts.data_len,
                              0, 0, 0)
     exit();
   } else {
-    DMA_COMMAND_MEM2MEM_FILL(dma_m2m_10, dma_m2m_11, 
+    DMA_COMMAND_MEM2MEM_FILL(dma_m2m_10, dma_m2m_11,
                              seq_kivec3xts.decr_buf_addr, 0,
                              seq_xts_sgl_scratch.addr2, 0,
                              seq_xts_sgl_scratch.len2,
                              0, 0, 0)
-    modify_field(seq_kivec5xts.data_len, 
+    modify_field(seq_kivec5xts.data_len,
                  (seq_kivec5xts.data_len - seq_xts_sgl_scratch.len2));
   }
 
   // DMA to SGL 3
   if (seq_kivec5xts.data_len <= seq_xts_sgl_scratch.len3) {
-    DMA_COMMAND_MEM2MEM_FILL(dma_m2m_12, dma_m2m_13, 
+    DMA_COMMAND_MEM2MEM_FILL(dma_m2m_12, dma_m2m_13,
                              seq_kivec3xts.decr_buf_addr, 0,
                              seq_xts_sgl_scratch.addr3, 0,
                              seq_kivec5xts.data_len,
                              0, 0, 0)
     exit();
   } else {
-    DMA_COMMAND_MEM2MEM_FILL(dma_m2m_12, dma_m2m_13, 
+    DMA_COMMAND_MEM2MEM_FILL(dma_m2m_12, dma_m2m_13,
                              seq_kivec3xts.decr_buf_addr, 0,
                              seq_xts_sgl_scratch.addr3, 0,
                              seq_xts_sgl_scratch.len3,
                              0, 0, 0)
-    modify_field(seq_kivec5xts.data_len, 
+    modify_field(seq_kivec5xts.data_len,
                  (seq_kivec5xts.data_len - seq_xts_sgl_scratch.len3));
   }
 
@@ -1216,7 +1223,7 @@ action seq_xts_sgl_pdma_xfer(addr0, len0, addr1, len1,
 }
 
 /*****************************************************************************
- *  seq_xts_comp_len_update: On XTS completion (presumably a decryption), read 
+ *  seq_xts_comp_len_update: On XTS completion (presumably a decryption), read
  *                           the compression header from the decrypted data to find
  *                           the actual data length. Use it to update next-in-chain
  *                           compression descriptor and SGL source.
@@ -1253,10 +1260,10 @@ action seq_xts_db_intr_override() {
 action seq_metrics0_commit(interrupts_raised, next_db_rung, descs_processed,
                            descs_aborted, status_pdma_xfers, hw_desc_xfers,
 			   hw_batch_errs, hw_op_errs) {
-			   
+
   // Store the K+I vector into scratch to get the K+I generated correctly
   SEQ_KIVEC9_USE(seq_kivec9_scratch, seq_kivec9)
-  
+
   modify_field(seq_metrics0.interrupts_raised, interrupts_raised);
   modify_field(seq_metrics0.next_db_rung, next_db_rung);
   modify_field(seq_metrics0.descs_processed, descs_processed);
@@ -1274,10 +1281,10 @@ action seq_metrics0_commit(interrupts_raised, next_db_rung, descs_processed,
 action seq_metrics1_commit(aol_update_reqs, sgl_update_reqs, sgl_pdma_xfers,
                            sgl_pdma_errs, sgl_pad_only_xfers, sgl_pad_only_errs,
 			   alt_descs_taken, alt_bufs_taken) {
-			   
+
   // Store the K+I vector into scratch to get the K+I generated correctly
   SEQ_KIVEC9_USE(seq_kivec9_scratch, seq_kivec9)
-  
+
   modify_field(seq_metrics1.aol_update_reqs, aol_update_reqs);
   modify_field(seq_metrics1.sgl_update_reqs, sgl_update_reqs);
   modify_field(seq_metrics1.sgl_pdma_xfers, sgl_pdma_xfers);
@@ -1293,10 +1300,10 @@ action seq_metrics1_commit(aol_update_reqs, sgl_update_reqs, sgl_pdma_xfers,
  *****************************************************************************/
 @pragma little_endian len_updates cp_header_updates seq_hw_bytes
 action seq_metrics2_commit(len_updates, cp_header_updates, seq_hw_bytes) {
-			   
+
   // Store the K+I vector into scratch to get the K+I generated correctly
   SEQ_KIVEC9_USE(seq_kivec9_scratch, seq_kivec9)
-  
+
   modify_field(seq_metrics2.len_updates, len_updates);
   modify_field(seq_metrics2.cp_header_updates, cp_header_updates);
   modify_field(seq_metrics2.seq_hw_bytes, seq_hw_bytes);
