@@ -53,6 +53,10 @@ static uint64_t dc_cfg_host;
 static uint64_t dc_cfg_host_opaque_tag_addr;
 
 #ifdef ELBA
+static uint64_t tmp_db_addr;
+#endif
+
+#ifdef ELBA
 static void init_cpdc_registers(void) {
     cp_cfg_glob = ELB_ADDR_BASE_MD_HENS_OFFSET +
         ELB_HENS_CSR_DHS_CRYPTO_CTL_CP_CFG_GLB_BYTE_ADDRESS;
@@ -841,6 +845,15 @@ compression_buf_init()
                                       kMinHostMemAllocSize);
     chksum_decomp_chain_pre_push_params_t cdc_pre_push;
     chksum_decomp_chain->pre_push(cdc_pre_push.caller_decomp_status_buf(decomp_status_host));
+
+#ifdef ELBA
+    int rv = utils::hbm_addr_alloc(sizeof(uint64_t), &tmp_db_addr);
+    if (rv < 0) {
+      printf("Error can't allocate tmp_db_addr for CP/DC in HBM\n");
+      tmp_db_addr = 0;
+     }
+#endif
+
 }
 
 static acc_ring_t *
@@ -1080,6 +1093,10 @@ void decompress_cp_desc_template_fill(cp_desc_t &d,
     d.datain_len = src_len == kCompEngineMaxSize ? 0 : src_len;
     d.threshold_len = threshold_len == kCompEngineMaxSize ? 0 : threshold_len;
     d.status_data = 0x3456;
+    #ifdef ELBA
+      d.doorbell_addr = tmp_db_addr;
+      d.cmd_bits.doorbell_on = 1;
+    #endif
 }
 
 int _compress_flat_64K_buf(acc_ring_push_t push_type,
@@ -1091,6 +1108,11 @@ int _compress_flat_64K_buf(acc_ring_push_t push_type,
   compress_cp_desc_template_fill(d, uncompressed_host_buf, compressed_host_buf,
                                  status_host_buf, compressed_host_buf,
                                  kUncompressedDataSize);
+#ifdef ELBA
+  d.doorbell_addr = tmp_db_addr;
+  d.cmd_bits.doorbell_on = 1;
+#endif
+
   if (run_cp_test(d, compressed_host_buf, status_host_buf,
                   push_type, seq_comp_qid) < 0) {
     printf("Testcase %s failed\n", __func__);
@@ -1124,6 +1146,11 @@ int _compress_same_src_and_dst(acc_ring_push_t push_type,
   compressed_buf->write_thru();
   compress_cp_desc_template_fill(d, compressed_buf, compressed_buf,
                                  status_buf, nullptr, kCompAppMinSize);
+#ifdef ELBA
+  d.doorbell_addr = tmp_db_addr;
+  d.cmd_bits.doorbell_on = 1;
+#endif
+
   if (run_cp_test(d, compressed_buf, status_buf,
                   push_type, seq_comp_qid) < 0) {
     printf("Testcase %s failed\n", __func__);
@@ -1156,6 +1183,10 @@ int _decompress_to_flat_64K_buf(acc_ring_push_t push_type,
   decompress_cp_desc_template_fill(d, compressed_host_buf, uncompressed_host_buf,
                                    status_host_buf, compressed_data_size,
                                    kUncompressedDataSize);
+#ifdef ELBA
+  d.doorbell_addr = tmp_db_addr;
+  d.cmd_bits.doorbell_on = 1;
+#endif
   if (run_dc_test(d, status_host_buf, 0,
                   push_type, seq_comp_qid) < 0) {
     printf("Testcase %s failed\n", __func__);
@@ -1187,6 +1218,10 @@ int compress_odd_size_buf() {
   printf("Starting testcase %s\n", __func__);
   compress_cp_desc_template_fill(d, uncompressed_host_buf, compressed_host_buf,
                                  status_host_buf, compressed_host_buf, 567);
+#ifdef ELBA
+  d.doorbell_addr = tmp_db_addr;
+  d.cmd_bits.doorbell_on = 1;
+#endif
   if (run_cp_test(d, compressed_host_buf, status_host_buf) < 0) {
     printf("Testcase %s failed\n", __func__);
     return -1;
@@ -1201,6 +1236,10 @@ int decompress_odd_size_buf() {
   printf("Starting testcase %s\n", __func__);
   decompress_cp_desc_template_fill(d, compressed_host_buf, uncompressed_host_buf,
                                    status_host_buf, last_cp_output_data_len, 567);
+#ifdef ELBA
+  d.doorbell_addr = tmp_db_addr;
+  d.cmd_bits.doorbell_on = 1;
+#endif
   if (run_dc_test(d, status_host_buf, 567) < 0) {
     printf("Testcase %s failed\n", __func__);
     return -1;
@@ -1259,6 +1298,10 @@ int _compress_host_sgl_to_host_sgl(acc_ring_push_t push_type,
          __func__, push_type, seq_comp_qid);
   compress_cp_desc_template_fill(d, host_sgl1, host_sgl3, status_host_buf,
                                  compressed_host_buf, 6000);
+#ifdef ELBA
+  d.doorbell_addr = tmp_db_addr;
+  d.cmd_bits.doorbell_on = 1;
+#endif
   d.cmd_bits.src_is_list = 1;
   d.cmd_bits.dst_is_list = 1;
   if (run_cp_test(d, compressed_host_buf, status_host_buf,
@@ -1318,6 +1361,10 @@ int _decompress_host_sgl_to_host_sgl(acc_ring_push_t push_type,
          __func__, push_type, seq_comp_qid);
   decompress_cp_desc_template_fill(d, host_sgl1, host_sgl3, status_host_buf,
                                    last_cp_output_data_len, 6000);
+#ifdef ELBA
+  d.doorbell_addr = tmp_db_addr;
+  d.cmd_bits.doorbell_on = 1;
+#endif
   d.cmd_bits.src_is_list = 1;
   d.cmd_bits.dst_is_list = 1;
   if (run_dc_test(d, status_host_buf, 6000, push_type, seq_comp_qid) < 0) {
@@ -1351,6 +1398,10 @@ int _compress_flat_64K_buf_in_hbm(acc_ring_push_t push_type,
           __func__, push_type, seq_comp_qid);
   compress_cp_desc_template_fill(d, uncompressed_buf, compressed_buf,
                                  status_buf, compressed_buf, kUncompressedDataSize);
+#ifdef ELBA
+  d.doorbell_addr = tmp_db_addr;
+  d.cmd_bits.doorbell_on = 1;
+#endif
   if (run_cp_test(d, compressed_buf, status_buf, push_type, seq_comp_qid) < 0) {
     printf("Testcase %s failed\n", __func__);
     return -1;
@@ -1381,6 +1432,10 @@ int _decompress_to_flat_64K_buf_in_hbm(acc_ring_push_t push_type,
   decompress_cp_desc_template_fill(d, compressed_buf, uncompressed_buf,
                                    status_buf, compressed_data_size,
                                    kUncompressedDataSize);
+#ifdef ELBA
+  d.doorbell_addr = tmp_db_addr;
+  d.cmd_bits.doorbell_on = 1;
+#endif
   if (run_dc_test(d, status_buf, 0, push_type, seq_comp_qid) < 0) {
     printf("Testcase %s failed\n", __func__);
     return -1;
@@ -1409,6 +1464,7 @@ int _compress_output_through_sequencer(acc_ring_push_t push_type,
   compress_cp_desc_template_fill(d, uncompressed_host_buf, compressed_buf,
                                  status_buf, compressed_buf,
                                  kUncompressedDataSize);
+  //d.cmd_bits.doorbell_on = 1;  //already done below
   // Prepare an SGL PDMA for the sequencer to output data.
   compressed_host_buf->fragment_find(0, 64)->clear_thru();
   seq_sgl->clear();
@@ -1497,6 +1553,10 @@ int verify_integrity_for_gt64K() {
 
   compress_cp_desc_template_fill(d, uncompressed_host_buf, compressed_host_buf,
                                  status_host_buf, nullptr, kCompAppMinSize);
+#ifdef ELBA
+  d.doorbell_addr = tmp_db_addr;
+  d.cmd_bits.doorbell_on = 1;
+#endif
   // Give 68K length
   d.extended_len = 1;
   d.status_data = 0x7654;
@@ -1510,6 +1570,10 @@ int verify_integrity_for_gt64K() {
   // Now repeat the test using only 4K data i.e. higher 16 bits are zero.
   compress_cp_desc_template_fill(d, uncompressed_host_buf, compressed_host_buf,
                                  status_host_buf, nullptr, kCompAppMinSize);
+#ifdef ELBA
+  d.doorbell_addr = tmp_db_addr;
+  d.cmd_bits.doorbell_on = 1;
+#endif
   d.status_data = 0x5454;
   if (run_cp_test(d, compressed_host_buf, status_host_buf) < 0) {
     printf("Testcase %s failed\n", __func__);
@@ -1540,6 +1604,10 @@ int _max_data_rate(acc_ring_push_t push_type,
   partial_buf->write_thru();
   compress_cp_desc_template_fill(comp_cp_desc[0], partial_buf, compressed_buf,
                                  status_buf, compressed_buf, kCompAppNominalSize);
+  #ifdef ELBA
+    comp_cp_desc[0].doorbell_addr = tmp_db_addr;
+    comp_cp_desc[0].cmd_bits.doorbell_on = 1;
+  #endif
   if (run_cp_test(comp_cp_desc[0], compressed_buf, status_buf) < 0) {
     printf("%s source compressed data generation failed\n", __func__);
     return -1;
@@ -1594,6 +1662,10 @@ int _max_data_rate(acc_ring_push_t push_type,
     compress_cp_desc_template_fill(*d, max_cp_uncompressed_buf,
                                    max_cp_compressed_buf, max_cp_status_buf,
                                    nullptr, kCompAppNominalSize);
+#ifdef ELBA
+    d->doorbell_addr = tmp_db_addr;
+    d->cmd_bits.doorbell_on = 1;
+#endif
     d->status_data += i;
     d->cmd_bits.opaque_tag_on = 1;
     d->opaque_tag_addr = max_cp_opaque_host_buf->pa() + (i * sizeof(uint64_t));
@@ -1613,6 +1685,10 @@ int _max_data_rate(acc_ring_push_t push_type,
     decompress_cp_desc_template_fill(*d, compressed_buf, max_dc_uncompressed_buf,
                                      max_dc_status_buf, source_compressed_len,
                                      kCompAppNominalSize);
+#ifdef ELBA
+    d->doorbell_addr = tmp_db_addr;
+    d->cmd_bits.doorbell_on = 1;
+#endif
     d->status_data += i;
     d->cmd_bits.opaque_tag_on = 1;
     d->opaque_tag_addr = max_dc_opaque_host_buf->pa() + (i * sizeof(uint64_t));
@@ -1729,7 +1805,10 @@ static int cp_dualq_flat_4K_buf(dp_mem_t *comp_buf,
   // Setup compression descriptor for low prirority queue
   compress_cp_desc_template_fill(lq_desc, uncomp_buf, comp_buf,
                                  status_buf1, comp_buf, kCompAppMinSize);
-
+#ifdef ELBA
+  lq_desc.doorbell_addr = tmp_db_addr;
+  lq_desc.cmd_bits.doorbell_on = 1;
+#endif
   // Setup compression descriptor for high prirority queue
   dp_mem_t *hq_uncomp_buf = uncomp_buf->fragment_find(kCompAppMinSize,
                                                       kCompAppMinSize);
@@ -1737,6 +1816,10 @@ static int cp_dualq_flat_4K_buf(dp_mem_t *comp_buf,
                                                   kCompAppMinSize);
   compress_cp_desc_template_fill(hq_desc, hq_uncomp_buf, hq_comp_buf,
                                  status_buf2, hq_comp_buf, kCompAppMinSize);
+#ifdef ELBA
+  hq_desc.doorbell_addr = tmp_db_addr;
+  hq_desc.cmd_bits.doorbell_on = 1;
+#endif
   hq_desc.status_data = lq_desc.status_data * 2;
 
   // Initialize status for both the requests
@@ -1972,7 +2055,10 @@ int _compress_clear_insert_header(acc_ring_push_t push_type,
   compress_cp_desc_template_fill(d, uncompressed_buf, compressed_buf,
                                  status_buf, compressed_buf,
                                  kUncompressedDataSize);
-
+#ifdef ELBA
+  d.doorbell_addr = tmp_db_addr;
+  d.cmd_bits.doorbell_on = 1;
+#endif
   // reset the bit to not to insert the header
   d.cmd_bits.insert_header = 0;
 
@@ -2003,7 +2089,10 @@ int _decompress_clear_header_present(acc_ring_push_t push_type,
   decompress_cp_desc_template_fill(d, compressed_buf, uncompressed_buf,
                                    status_buf, last_cp_output_data_len,
                                    kUncompressedDataSize);
-
+#ifdef ELBA
+  d.doorbell_addr = tmp_db_addr;
+  d.cmd_bits.doorbell_on = 1;
+#endif
   // reset the bits to invalidate the verification against header
   d.cmd_bits.header_present = 0;
   d.cmd_bits.cksum_verify_en = 0;

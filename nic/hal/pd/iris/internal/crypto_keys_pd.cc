@@ -2,21 +2,26 @@
 #include "nic/sdk/asic/cmn/asic_hbm.hpp"
 #include "nic/include/pd_api.hpp"
 #include "nic/hal/pd/iris/internal/p4plus_pd_api.h"
-#ifdef BARCO    /* TBD-ELBA-REBASE: */
-#include "nic/sdk/platform/capri/capri_barco_crypto.hpp"
-#include "nic/sdk/platform/capri/capri_barco_res.hpp"
-#include "nic/sdk/platform/capri/capri_barco_sym_apis.hpp"
+//#ifdef BARCO    /* TBD-ELBA-REBASE: */
+#ifdef ELBA
+  #include "nic/sdk/platform/elba/elba_barco_crypto.hpp"
+  #include "nic/sdk/platform/elba/elba_barco_res.hpp"
+  #include "nic/sdk/platform/elba/elba_barco_sym_apis.hpp"
+#else
+  #include "nic/sdk/platform/capri/capri_barco_crypto.hpp"
+  #include "nic/sdk/platform/capri/capri_barco_res.hpp"
+  #include "nic/sdk/platform/capri/capri_barco_sym_apis.hpp"
 #endif
 
 #define MAX_IPSEC_PAD_SIZE 256
 
-#ifndef BARCO    /* TBD-ELBA-REBASE: */
-typedef struct capri_barco_asym_key_desc_s {
-    uint64_t                key_param_list;
-    uint32_t                command_reg;
-    uint32_t                reserved;
-} __PACK__ capri_barco_asym_key_desc_t;
-#endif
+//#ifndef BARCO    /* TBD-ELBA-REBASE: */
+//typedef struct elba_barco_asym_key_desc_s {
+//    uint64_t                key_param_list;
+//    uint32_t                command_reg;
+//    uint32_t                reserved;
+//} __PACK__ elba_barco_asym_key_desc_t;
+//#endif
 
 namespace hal {
 namespace pd {
@@ -29,11 +34,12 @@ pd_crypto_alloc_key (pd_func_args_t *pd_func_args)
     pd_crypto_alloc_key_args_t *args = pd_func_args->pd_crypto_alloc_key;
     int32_t             *key_idx = args->key_idx;
 
-#ifdef BARCO    /* TBD-ELBA-REBASE: */
-    sdk_ret = capri_barco_sym_alloc_key(key_idx);
+#ifdef ELBA
+    sdk_ret = elba_barco_sym_alloc_key(key_idx);
 #else
-    sdk_ret = SDK_RET_OK;
+    sdk_ret = capri_barco_sym_alloc_key(key_idx);
 #endif
+
     ret = hal_sdk_ret_to_hal_ret(sdk_ret);
     if (ret != HAL_RET_OK) {
         HAL_TRACE_ERR("SessKey: Failed to allocate key");
@@ -54,11 +60,13 @@ pd_crypto_alloc_key_withid (pd_func_args_t *pd_func_args)
         pd_func_args->pd_crypto_alloc_key_withid;
     int32_t             key_idx = args->key_idx;
 
-#ifdef BARCO    /* TBD-ELBA-REBASE: */
-    sdk_ret = capri_barco_sym_alloc_key_withid(key_idx, args->allow_dup_alloc);
-#else
-    sdk_ret = SDK_RET_OK;
-#endif
+    #ifdef ELBA
+      sdk_ret = elba_barco_sym_alloc_key_withid(key_idx, args->allow_dup_alloc);
+    #else
+      sdk_ret = capri_barco_sym_alloc_key_withid(key_idx, args->allow_dup_alloc);
+    #endif
+
+
     ret = hal_sdk_ret_to_hal_ret(sdk_ret);
     if (ret != HAL_RET_OK) {
         HAL_TRACE_ERR("SessKey: Failed to allocate key by ID: {}", key_idx);
@@ -77,12 +85,12 @@ pd_crypto_free_key (pd_func_args_t *pd_func_args)
     pd_crypto_free_key_args_t *args = pd_func_args->pd_crypto_free_key;
     int32_t             key_idx = args->key_idx;
 
-#ifdef BARCO    /* TBD-ELBA-REBASE: */
-    sdk_ret = capri_barco_sym_free_key(key_idx);
-#else
-    key_idx = 0;
-    sdk_ret = SDK_RET_OK;
-#endif
+   #ifdef ELBA
+     sdk_ret = elba_barco_sym_free_key(key_idx);
+   #else
+     sdk_ret = capri_barco_sym_free_key(key_idx);
+   #endif
+
     ret = hal_sdk_ret_to_hal_ret(sdk_ret);
     if (ret != HAL_RET_OK) {
         HAL_TRACE_ERR("SessKey: Failed to free key memory: {}", key_idx);
@@ -103,14 +111,13 @@ pd_crypto_write_key (pd_func_args_t *pd_func_args)
     int32_t key_idx = args->key_idx;
     crypto_key_t *key = args->key;
 
-#ifdef BARCO    /* TBD-ELBA-REBASE: */
-    sdk_ret = capri_barco_setup_key(key_idx, (crypto_key_type_t)key->key_type,
+    #ifdef ELBA
+      sdk_ret = elba_barco_setup_key(key_idx, (crypto_key_type_t)key->key_type,
                                     key->key, key->key_size);
-#else
-    args->key_idx = key_idx;
-    args->key = key;
-    sdk_ret = SDK_RET_OK;
-#endif
+    #else
+      sdk_ret = capri_barco_setup_key(key_idx, (crypto_key_type_t)key->key_type,
+                                    key->key, key->key_size);
+    #endif
     ret = hal_sdk_ret_to_hal_ret(sdk_ret);
 
     return ret;
@@ -125,14 +132,14 @@ pd_crypto_read_key (pd_func_args_t *pd_func_args)
     int32_t key_idx = args->key_idx;
     crypto_key_t *key = args->key;
 
-#ifdef BARCO    /* TBD-ELBA-REBASE: */
-    sdk_ret = capri_barco_read_key(key_idx, (crypto_key_type_t*)&key->key_type,
+    #ifdef ELBA
+      sdk_ret = elba_barco_read_key(key_idx, (crypto_key_type_t*)&key->key_type,
                                    key->key, &key->key_size);
-#else
-    args->key_idx = key_idx;
-    args->key = key;
-    sdk_ret = SDK_RET_OK;
-#endif
+    #else
+      sdk_ret = capri_barco_read_key(key_idx, (crypto_key_type_t*)&key->key_type,
+                                   key->key, &key->key_size);
+    #endif
+
     ret = hal_sdk_ret_to_hal_ret(sdk_ret);
 
     return ret;
@@ -148,11 +155,12 @@ pd_crypto_asym_alloc_key (pd_func_args_t *pd_func_args)
     hal_ret_t       ret = HAL_RET_OK;
     int32_t *key_idx = args->key_idx;
 
-#ifdef BARCO    /* TBD-ELBA-REBASE: */
-    sdk_ret = capri_barco_asym_alloc_key(key_idx);
-#else
-    sdk_ret = SDK_RET_OK;
-#endif
+    #ifdef ELBA
+      sdk_ret = elba_barco_asym_alloc_key(key_idx);
+    #else
+      sdk_ret = capri_barco_asym_alloc_key(key_idx);
+    #endif
+
     ret = hal_sdk_ret_to_hal_ret(sdk_ret);
     if (ret != HAL_RET_OK) {
         HAL_TRACE_ERR("SessKey: Failed to allocate key memory");
@@ -175,11 +183,12 @@ pd_crypto_asym_free_key (pd_func_args_t *pd_func_args)
      * if any referenced by the key descriptor
      */
 
-#ifdef BARCO    /* TBD-ELBA-REBASE: */
-    sdk_ret = capri_barco_asym_free_key(key_idx);
-#else
-    sdk_ret = SDK_RET_OK;
-#endif
+   #ifdef ELBA
+     sdk_ret = elba_barco_asym_free_key(key_idx);
+   #else
+     sdk_ret = capri_barco_asym_free_key(key_idx);
+   #endif
+
     ret = hal_sdk_ret_to_hal_ret(sdk_ret);
     if (ret != HAL_RET_OK) {
         HAL_TRACE_ERR("AsymKey: Failed to free key memory: {}", key_idx);
@@ -196,20 +205,23 @@ pd_crypto_asym_write_key (pd_func_args_t *pd_func_args)
     hal_ret_t              ret = HAL_RET_OK;
     pd_crypto_asym_write_key_args_t *args =
         pd_func_args->pd_crypto_asym_write_key;
+#ifdef ELBA
+    elba_barco_asym_key_desc_t     key_desc;
+#else
     capri_barco_asym_key_desc_t     key_desc;
+#endif
     int32_t key_idx = args->key_idx;
     crypto_asym_key_t *key = args->key;
 
     key_desc.key_param_list = key->key_param_list;
     key_desc.command_reg = key->command_reg;
 
-#ifdef BARCO    /* TBD-ELBA-REBASE: */
-    sdk_ret = capri_barco_asym_write_key(key_idx, &key_desc);
-#else
-    key->key_param_list = key_desc.key_param_list;
-    key->command_reg = key_desc.command_reg;
-    sdk_ret = SDK_RET_OK;
-#endif
+    #ifdef ELBA
+      sdk_ret = elba_barco_asym_write_key(key_idx, &key_desc);
+    #else
+      sdk_ret = capri_barco_asym_write_key(key_idx, &key_desc);
+    #endif
+
     ret = hal_sdk_ret_to_hal_ret(sdk_ret);
     if (ret != HAL_RET_OK) {
         HAL_TRACE_ERR("Failed to write Barco Asym key descriptor @ {}",
@@ -227,17 +239,20 @@ pd_crypto_asym_read_key (pd_func_args_t *pd_func_args)
     sdk_ret_t              sdk_ret;
     hal_ret_t              ret = HAL_RET_OK;
     pd_crypto_asym_read_key_args_t *args = pd_func_args->pd_crypto_asym_read_key;
+#ifdef ELBA
+    elba_barco_asym_key_desc_t     key_desc;
+#else
     capri_barco_asym_key_desc_t     key_desc;
+#endif
     int32_t key_idx = args->key_idx;
     crypto_asym_key_t *key = args->key;
 
-#ifdef BARCO    /* TBD-ELBA-REBASE: */
-    sdk_ret = capri_barco_asym_read_key(key_idx, &key_desc);
-#else
-    key_desc.key_param_list = 0;
-    key_desc.command_reg = 0;
-    sdk_ret = SDK_RET_OK;
-#endif
+    #ifdef ELBA
+      sdk_ret = elba_barco_asym_read_key(key_idx, &key_desc);
+    #else
+      sdk_ret = capri_barco_asym_read_key(key_idx, &key_desc);
+    #endif
+
     ret = hal_sdk_ret_to_hal_ret(sdk_ret);
     if (ret != HAL_RET_OK) {
         HAL_TRACE_ERR("Failed to read Barco Asym key descriptor from {}", key_idx);

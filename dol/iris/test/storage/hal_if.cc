@@ -13,7 +13,7 @@
 #include "gflags/gflags.h"
 #include "nic/sdk/storage/storage_seq_common.h"
 
-#define HAL_WAIT_READY_TIMEOUT_SECS 300
+#define HAL_WAIT_READY_TIMEOUT_SECS 1000
 
 DECLARE_uint64(hal_port);
 DECLARE_string(hal_ip);

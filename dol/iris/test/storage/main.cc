@@ -225,6 +225,7 @@ std::vector<tests::TestEntry> comp_seq_tests = {
   {&tests::seq_compress_output_encrypt_app_nominal_size, "Sequencer Compress->XTS encrypt chaining: app nominal block size", false},
   {&tests::seq_decrypt_output_decompress_len_update_flat, "Sequencer XTS decrypt->Decompress chaining: len update flat", false},
   {&tests::seq_compress_output_encrypt_app_test_size, "Sequencer Compress->XTS encrypt chaining: app test block size", false},
+#ifndef ELBA  // TBD-ELBA-REBASE
   {&tests::seq_decrypt_output_decompress_len_update_sgl_src, "Sequencer XTS decrypt->Decompress chaining: len update SGL", false},
   {&tests::seq_compress_output_encrypt_app_max_size, "Sequencer Compress->XTS encrypt chaining: app max block size", false},
   {&tests::seq_decrypt_output_decompress_len_update_sgl_src_vec, "Sequencer XTS decrypt->Decompress chaining: len update SGL vector", false},
@@ -235,7 +236,7 @@ std::vector<tests::TestEntry> comp_seq_tests = {
   {&tests::seq_chksum_decompress_last_app_blk, "Sequencer Checksum-decompress chaining: app test block size", false},
   {&tests::seq_compress_output_hash_app_nominal_size, "Sequencer Compress->hash chaining: app nominal block size", false},
   {&tests::seq_chksum_decompress_last_app_blk, "Sequencer Checksum-decompress chaining: app nominal block size", false},
-
+#endif
   // Last in series
   {&tests::compression_resync, "Compression rings resync", false},
   {&tests::xts_resync, "XTS rings resync", false},
@@ -507,7 +508,9 @@ int main(int argc, char**argv) {
       run_xts_perf_tests = false;
       run_comp_perf_tests = false;
       run_pdma_tests = true;
+#ifndef ELBA     // TBD-ELBA-REBASE
       run_acc_scale_tests_map = ACC_SCALE_TEST_ALL;
+#endif
   } else if (FLAGS_test_group == "rtl_sanity") {
       run_unit_tests = true;
       run_nvme_tests = true;

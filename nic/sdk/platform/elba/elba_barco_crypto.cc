@@ -49,6 +49,26 @@ static uint64_t    key_mem_base = 0;
 static indexer    *elba_barco_sym_keys_idxr_ = NULL;
 
 sdk_ret_t
+elba_barco_sym_key_init (void)
+{
+    sdk_ret_t           ret = SDK_RET_OK;
+    uint32_t            region_sz = 0;
+
+    key_mem_base = asic_get_mem_addr(key_mem);
+    region_sz = asic_get_mem_size_kb(key_mem) * 1024;
+    key_mem_size = region_sz / CRYPTO_SYM_KEY_SIZE_MAX;
+    assert(key_mem_size >= CRYPTO_KEY_COUNT_MAX);
+
+    // Indexer based allocator to manage the crypto session keys
+    elba_barco_sym_keys_idxr_ =
+        sdk::lib::indexer::factory(CRYPTO_KEY_COUNT_MAX);
+    SDK_ASSERT_RETURN((elba_barco_sym_keys_idxr_ != NULL),
+                      SDK_RET_NO_RESOURCE);
+
+    return ret;
+}
+
+sdk_ret_t
 elba_barco_crypto_init (platform_type_t platform)
 {
     sdk_ret_t ret = SDK_RET_OK;
@@ -89,6 +109,11 @@ elba_barco_crypto_init (platform_type_t platform)
      * Initialize the padding pattern table for use with TLS-proxy.
      */
     ret = elba_barco_crypto_init_tls_pad_table();
+    if (ret != SDK_RET_OK) {
+        return ret;
+    }
+
+    ret = elba_barco_sym_key_init();
     if (ret != SDK_RET_OK) {
         return ret;
     }
@@ -354,6 +379,28 @@ elba_barco_sym_alloc_key (int32_t *key_idx)
     elba_barco_init_key(*key_idx, key_addr);
     SDK_TRACE_DEBUG("SessKey:%s: Allocated key memory @ index: %d",
                     __FUNCTION__, *key_idx);
+    return ret;
+}
+
+sdk_ret_t
+elba_barco_sym_alloc_key_withid (int32_t key_idx, bool allow_dup_alloc)
+{
+    sdk_ret_t           ret = SDK_RET_OK;
+    indexer::status     is = indexer::SUCCESS;
+    uint64_t            key_addr = 0;
+
+    is = elba_barco_sym_keys_idxr_->alloc_withid(key_idx);
+    if (is != indexer::SUCCESS) {
+        SDK_TRACE_ERR("SessKey: Failed to allocate key memory");
+        return SDK_RET_NO_RESOURCE;
+    }
+    /* Setup the key descriptor with the corresponding key memory
+    *  Currently statically carved and associated
+    */
+    key_addr = key_mem_base + (key_idx * CRYPTO_SYM_KEY_SIZE_MAX);
+    elba_barco_init_key(key_idx, key_addr);
+    SDK_TRACE_DEBUG("SessKey:%s: Allocated key memory @ index: %d",
+                    __FUNCTION__, key_idx);
     return ret;
 }
 
