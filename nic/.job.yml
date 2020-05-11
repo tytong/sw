@@ -234,7 +234,7 @@ targets:
   #  feature:
   #  build-dependencies:
   #  - build-iris-x86
-  # Unified Mode changes. No longer support multicast 
+  # Unified Mode changes. No longer support multicast
   #dol/multicast:
   #  commands: ["make", "jobd/dol/multicast"]
   #  owners: ["email:ajeer@pensando.io"]
@@ -469,7 +469,7 @@ targets:
     - build-iris-x86
   # Commenting out as this expects agent to create uplinks.
   # With this PR, we remove agent creating uplinks. HAL creating
-  # uplinks is done only on HW. 
+  # uplinks is done only on HW.
   #e2e/naples-sim:
   #  commands: ["make", "jobd/e2e/naples-sim"]
   #  owners: ["email:sudhiaithal@pensando.io"]
@@ -558,6 +558,24 @@ targets:
     area:
     sub-area:
     feature:
+
+# ====================== Elba DOLs ===========================
+  elba_dol/classic:
+    commands: ["make", "jobd/dol/elba_classic"]
+    owners: ["email:vsinha@pensando.io"]
+    area:
+    sub-area:
+    feature:
+    build-dependencies:
+    - build-iris-x86-elba
+  elba_dol/eth:
+    commands: ["make", "jobd/dol/elba_eth"]
+    owners: ["email:vsinha@pensando.io"]
+    area:
+    sub-area:
+    feature:
+    build-dependencies:
+    - build-iris-x86-elba
 
 image:
   bind_dir: "/sw"

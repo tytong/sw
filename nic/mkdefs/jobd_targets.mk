@@ -570,3 +570,14 @@ jobd/athena_app/make: ${JOBD_PREREQS}
 .PHONY: jobd/apulu/upgrade
 jobd/apulu/upgrade: ${JOBD_PREREQS}
 	${NICDIR}/apollo/test/tools/apulu/run_upgrade_gtests.sh ${COVERAGE_OPTS}
+
+# Elba DOLs
+.PHONY: jobd/dol/elba_classic
+jobd/dol/elba_classic: ${JOBD_PREREQS}
+	${NICDIR}/tools/sw-env elba iris
+	ASIC=elba ${NICDIR}/run.py ${COVERAGE_OPTS} --topo classic --feature classic --classic
+
+.PHONY: jobd/dol/elba_eth
+jobd/dol/elba_eth: ${JOBD_PREREQS}
+	${NICDIR}/tools/sw-env elba iris
+	ASIC=elba ${NICDIR}/run.py ${COVERAGE_OPTS} --topo eth --feature eth --microseg-enable
