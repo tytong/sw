@@ -23,7 +23,11 @@
 #include "dol/iris/test/storage/compression_test.hpp"
 #include "dol/iris/test/storage/acc_scale_tests.hpp"
 #include "nic/sdk/platform/utils/qstate_mgr.hpp"
+#ifdef ELBA
+#include "nic/sdk/platform/elba/elba_state.hpp"
+#else
 #include "nic/sdk/platform/capri/capri_state.hpp"
+#endif
 
 namespace queues {
 void queues_shutdown();
@@ -470,16 +474,16 @@ int main(int argc, char**argv) {
   gflags::ParseCommandLineFlags(&argc, &argv, true);
   signal(SIGSEGV, sig_handler);
 
-  std::cout << "Input - hal_port: "   << FLAGS_hal_port 
-            << "\nInput - hal_ip: "   << FLAGS_hal_ip 
+  std::cout << "Input - hal_port: "   << FLAGS_hal_port
+            << "\nInput - hal_ip: "   << FLAGS_hal_ip
             << "\nTest group: "       << FLAGS_test_group
-            << "\nPolling interval: " << FLAGS_poll_interval 
-            << "\n# PDMA queues (power of 2): " << FLAGS_num_pdma_queues 
-            << "\n# Accelerator chain replications (power of 2): " << FLAGS_acc_scale_chain_replica 
-            << "\n# Accelerator queue submissions (power of 2): " << FLAGS_acc_scale_submissions 
-            << "\nBlock size for accelerator scale testing (in power of 2): " << FLAGS_acc_scale_blk_size 
-            << "\n# Iterations for accelerator scale testing (0 = infinite): " << FLAGS_acc_scale_iters 
-            << "\nVerification method for accelerator scale testing: " << FLAGS_acc_scale_verify_method 
+            << "\nPolling interval: " << FLAGS_poll_interval
+            << "\n# PDMA queues (power of 2): " << FLAGS_num_pdma_queues
+            << "\n# Accelerator chain replications (power of 2): " << FLAGS_acc_scale_chain_replica
+            << "\n# Accelerator queue submissions (power of 2): " << FLAGS_acc_scale_submissions
+            << "\nBlock size for accelerator scale testing (in power of 2): " << FLAGS_acc_scale_blk_size
+            << "\n# Iterations for accelerator scale testing (0 = infinite): " << FLAGS_acc_scale_iters
+            << "\nVerification method for accelerator scale testing: " << FLAGS_acc_scale_verify_method
             << "\nAccelerator scale tests: " << FLAGS_acc_scale_test
             << "\nRTL: " << FLAGS_rtl
             << "\nWith RTL --skipverify in effect: " << FLAGS_with_rtl_skipverify
@@ -625,7 +629,7 @@ int main(int argc, char**argv) {
 
   if (FLAGS_combined) {
     printf("RDMA configuration, NVME datapath initialization skipped - running in combined sanity mode\n");
-  } else { 
+  } else {
     if (rdma_init((run_nvme_dp_tests || run_nvme_dp_scale_tests || run_nvme_dp_scale_perf)) < 0) {
       printf("RDMA Setup failed\n");
       return 1;
@@ -718,7 +722,7 @@ int main(int argc, char**argv) {
     }
     printf("Added comp tests \n");
   }
- 
+
   // Add comp_seq tests
   if (run_comp_seq_tests) {
     for (size_t i = 0; i < comp_seq_tests.size(); i++) {
@@ -726,7 +730,7 @@ int main(int argc, char**argv) {
     }
     printf("Added comp_seq tests \n");
   }
- 
+
   // Add comp_perf tests
   if (run_comp_perf_tests) {
     for (size_t i = 0; i < comp_perf_tests.size(); i++) {
@@ -833,7 +837,7 @@ int main(int argc, char**argv) {
   printf("--------------------------------------------------------------\n");
   printf("Number\t\tName\t\t\tResult\n");
   printf("--------------------------------------------------------------\n");
-  
+
   int rc = 0;
   for (size_t i = 0; i < test_suite.size(); i++) {
     printf("%lu\t", i+1);
@@ -841,7 +845,7 @@ int main(int argc, char**argv) {
     printf("%s\n", test_suite[i].test_succeded ? "Success" : "Failure");
     if (!test_suite[i].test_succeded) rc = 1;
   }
-  if (rc != 0) { 
+  if (rc != 0) {
     printf("\nOverall Report: FAILURE \n");
   } else {
     printf("\nOverall Report: SUCCESS \n");

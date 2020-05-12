@@ -10,7 +10,11 @@
 #include "tests.hpp"
 #include "logger.hpp"
 #include "nic/sdk/platform/utils/qstate_mgr.hpp"
+#ifdef ELBA
+#include "nic/sdk/platform/elba/elba_state.hpp"
+#else
 #include "nic/sdk/platform/capri/capri_state.hpp"
+#endif
 #include "nic/sdk/platform/fru/fru.hpp"
 #include "crypto_rsa_testvec.hpp"
 #include "crypto_ecdsa_testvec.hpp"
@@ -32,8 +36,13 @@ DEFINE_uint64(long_poll_interval, 300,
 #ifdef __x86_64__
 DEFINE_string(script_dir, "/sw/nic/third-party/nist-cavp",
               "Script directory path)");
+#ifdef ELBA
+DEFINE_string(engine_path, "/sw/nic/build/x86_64/iris/elba/lib/libtls_pse.so",
+              "SSL engine library full path");
+#else
 DEFINE_string(engine_path, "/sw/nic/build/x86_64/iris/capri/lib/libtls_pse.so",
               "SSL engine library full path");
+#endif
 DEFINE_string(nicmgr_config_file, "/sw/platform/src/app/nicmgrd/etc/accel.json",
               "nicmgr json configuration filename (full path)");
 #else
@@ -423,7 +432,7 @@ common_setup(void)
 static bool
 rsa_testvectors_run(void *test_param)
 {
-    vector<rsa_vector_entry_t>  *testvectors = 
+    vector<rsa_vector_entry_t>  *testvectors =
                       static_cast<vector<rsa_vector_entry_t> *>(test_param);
     uint32_t        failure_count;
 
@@ -502,7 +511,7 @@ rsa_testvectors_run(void *test_param)
 static bool
 ecdsa_testvectors_run(void *test_param)
 {
-    vector<ecdsa_vector_entry_t>  *testvectors = 
+    vector<ecdsa_vector_entry_t>  *testvectors =
                       static_cast<vector<ecdsa_vector_entry_t> *>(test_param);
     uint32_t        failure_count;
 
@@ -580,7 +589,7 @@ ecdsa_testvectors_run(void *test_param)
 static bool
 drbg_testvectors_run(void *test_param)
 {
-    vector<drbg_vector_entry_t>  *testvectors = 
+    vector<drbg_vector_entry_t>  *testvectors =
                        static_cast<vector<drbg_vector_entry_t> *>(test_param);
     uint32_t        failure_count;
 
@@ -622,7 +631,7 @@ drbg_testvectors_run(void *test_param)
     for (uint32_t i = 0; i < testvectors->size(); i++) {
         const drbg_vector_entry_t& entry = testvectors->at(i);
 
-        for (int inst = crypto_drbg::DRBG_INSTANCE0; 
+        for (int inst = crypto_drbg::DRBG_INSTANCE0;
              inst < crypto_drbg::DRBG_INSTANCE_MAX;
              inst++) {
 
@@ -641,7 +650,7 @@ drbg_testvectors_run(void *test_param)
 static bool
 sha_testvectors_run(void *test_param)
 {
-    vector<sha_vector_entry_t>  *testvectors = 
+    vector<sha_vector_entry_t>  *testvectors =
                       static_cast<vector<sha_vector_entry_t> *>(test_param);
     uint32_t        failure_count;
 
@@ -725,7 +734,7 @@ sha_testvectors_run(void *test_param)
 static bool
 aes_testvectors_run(void *test_param)
 {
-    vector<aes_vector_entry_t>  *testvectors = 
+    vector<aes_vector_entry_t>  *testvectors =
                       static_cast<vector<aes_vector_entry_t> *>(test_param);
     uint32_t        failure_count;
 
@@ -819,10 +828,10 @@ main(int argc,
     gflags::ParseCommandLineFlags(&argc, &argv, true);
     signal(SIGSEGV, sig_handler);
 
-    std::cout << "Input - hal_port: "        << FLAGS_hal_port 
-              << "\nInput - hal_ip: "        << FLAGS_hal_ip 
+    std::cout << "Input - hal_port: "        << FLAGS_hal_port
+              << "\nInput - hal_ip: "        << FLAGS_hal_ip
               << "\nTest group:     "        << FLAGS_test_group
-              << "\nScripts dir:    "        << FLAGS_script_dir 
+              << "\nScripts dir:    "        << FLAGS_script_dir
               << "\nOpenssl engine path: "   << FLAGS_engine_path
               << std::endl;
 

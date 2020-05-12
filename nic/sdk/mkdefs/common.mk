@@ -47,36 +47,9 @@ export ASIC_SRC := ${SDKDIR}/asic_repo/asic
 
 export ASIC_INCL_DIR := ${SDKDIR}/third-party/asic
 
-export NIC_CSR_INCS := ${ASIC_INCL_DIR}/capri/model/cap_top \
-    ${ASIC_INCL_DIR}/capri/model/utils \
-    ${ASIC_INCL_DIR}/capri/model/cap_prd \
-    ${ASIC_INCL_DIR}/capri/model/cap_ptd \
-    ${ASIC_INCL_DIR}/capri/model/cap_psp \
-    ${ASIC_INCL_DIR}/capri/model/cap_ppa \
-    ${ASIC_INCL_DIR}/capri/model/cap_te \
-    ${ASIC_INCL_DIR}/capri/model/cap_mpu \
-    ${ASIC_INCL_DIR}/capri/model/cap_pic \
-    ${ASIC_INCL_DIR}/capri/model/cap_pcie \
-    ${ASIC_INCL_DIR}/capri/model/cap_npv \
-    ${ASIC_INCL_DIR}/capri/model/cap_txs \
-    ${ASIC_INCL_DIR}/capri/model/cap_pb \
-    ${ASIC_INCL_DIR}/capri/model/cap_wa \
-    ${ASIC_INCL_DIR}/capri/model/cap_ms \
-    ${ASIC_INCL_DIR}/capri/model/cap_em \
-    ${ASIC_INCL_DIR}/capri/model/cap_mc \
-    ${ASIC_INCL_DIR}/capri/model/cap_he \
-    ${ASIC_INCL_DIR}/capri/model/cap_dpa \
-    ${ASIC_INCL_DIR}/capri/model/cap_sema \
-    ${ASIC_INCL_DIR}/capri/model/cap_intr \
-    ${ASIC_INCL_DIR}/capri/model/cap_mx \
-    ${ASIC_INCL_DIR}/capri/model/cap_bx \
-    ${ASIC_INCL_DIR}/capri/model/cap_ap \
-    ${ASIC_INCL_DIR}/capri/model/cap_he/readonly \
-    ${ASIC_INCL_DIR}/ip/verif/pcpp \
-    ${ASIC_INCL_DIR}/capri/design/common/gen \
-    ${ASIC_INCL_DIR}/capri/verif/apis \
+ifeq ($(ASIC),elba)
+export NIC_CSR_INCS := ${ASIC_INCL_DIR}/ip/verif/pcpp \
     ${SDKDIR}/model_sim/include \
-    ${ASIC_INCL_DIR}/capri/model/cap_top/csr_defines \
     ${ASIC_INCL_DIR}/elba/model/elb_top \
     ${ASIC_INCL_DIR}/elba/model/utils \
     ${ASIC_INCL_DIR}/elba/model/elb_prd \
@@ -113,4 +86,35 @@ export NIC_CSR_INCS := ${ASIC_INCL_DIR}/capri/model/cap_top \
     ${ASIC_INCL_DIR}/elba/design/common/gen \
     ${ASIC_INCL_DIR}/elba/verif/apis \
     ${ASIC_INCL_DIR}/elba/model/elb_top/csr_defines
-
+else
+export NIC_CSR_INCS := ${ASIC_INCL_DIR}/capri/model/cap_top \
+    ${ASIC_INCL_DIR}/capri/model/utils \
+    ${ASIC_INCL_DIR}/capri/model/cap_prd \
+    ${ASIC_INCL_DIR}/capri/model/cap_ptd \
+    ${ASIC_INCL_DIR}/capri/model/cap_psp \
+    ${ASIC_INCL_DIR}/capri/model/cap_ppa \
+    ${ASIC_INCL_DIR}/capri/model/cap_te \
+    ${ASIC_INCL_DIR}/capri/model/cap_mpu \
+    ${ASIC_INCL_DIR}/capri/model/cap_pic \
+    ${ASIC_INCL_DIR}/capri/model/cap_pcie \
+    ${ASIC_INCL_DIR}/capri/model/cap_npv \
+    ${ASIC_INCL_DIR}/capri/model/cap_txs \
+    ${ASIC_INCL_DIR}/capri/model/cap_pb \
+    ${ASIC_INCL_DIR}/capri/model/cap_wa \
+    ${ASIC_INCL_DIR}/capri/model/cap_ms \
+    ${ASIC_INCL_DIR}/capri/model/cap_em \
+    ${ASIC_INCL_DIR}/capri/model/cap_mc \
+    ${ASIC_INCL_DIR}/capri/model/cap_he \
+    ${ASIC_INCL_DIR}/capri/model/cap_dpa \
+    ${ASIC_INCL_DIR}/capri/model/cap_sema \
+    ${ASIC_INCL_DIR}/capri/model/cap_intr \
+    ${ASIC_INCL_DIR}/capri/model/cap_mx \
+    ${ASIC_INCL_DIR}/capri/model/cap_bx \
+    ${ASIC_INCL_DIR}/capri/model/cap_ap \
+    ${ASIC_INCL_DIR}/capri/model/cap_he/readonly \
+    ${ASIC_INCL_DIR}/ip/verif/pcpp \
+    ${ASIC_INCL_DIR}/capri/design/common/gen \
+    ${ASIC_INCL_DIR}/capri/verif/apis \
+    ${SDKDIR}/model_sim/include \
+    ${ASIC_INCL_DIR}/capri/model/cap_top/csr_defines
+endif

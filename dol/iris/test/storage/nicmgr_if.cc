@@ -6,8 +6,11 @@
 #include "qstate_if.hpp"
 #include "logger.hpp"
 #include "nic/sdk/platform/utils/qstate_mgr.hpp"
+#ifdef ELBA
+#include "nic/sdk/platform/elba/elba_state.hpp"
+#else
 #include "nic/sdk/platform/capri/capri_state.hpp"
-
+#endif
 #include <assert.h>
 #include <stdint.h>
 #include <unistd.h>
