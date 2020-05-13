@@ -23,6 +23,7 @@
 #include "platform/utils/mpartition.hpp"
 #include "platform/elba/elba_toeplitz.hpp"
 #include "include/sdk/crypto_apis.hpp"
+#include "asic/cmn/asic_hbm.hpp"
 #include "platform/elba/elba_barco_rings.hpp"
 #include "platform/elba/elba_barco_sym_apis.hpp"
 #include "platform/elba/elba_barco_asym_apis.hpp"
@@ -40,6 +41,35 @@ namespace asic {
 namespace pd {
 
 extern bool g_mock_mode_;
+
+#define MAX_IPSEC_PAD_SIZE      256
+#define CRYPTO_KEY_SIZE_MAX     64  /* 2 * 256 bit key */
+
+typedef struct crypto_key_s {
+    crypto_key_type_t       key_type;
+    uint32_t                key_size;
+    uint8_t                 key[CRYPTO_KEY_SIZE_MAX];
+} __PACK__ crypto_key_t;
+
+typedef struct crypto_asym_key_s {
+    uint64_t                key_param_list;     /* Address to the DMA
+                                                   descriptor that contains the
+                                                   key/param */
+    uint32_t                command_reg;        /* Command associated with this
+                                                   key descriptor */
+    uint32_t                reserved;
+} __PACK__ crypto_asym_key_t;
+
+static inline bool
+asicpd_p4plus_hbm_write (uint64_t addr, uint8_t* data, uint32_t size_in_bytes,
+                  p4plus_cache_action_t action)
+{
+    sdk_ret_t rv = sdk::asic::asic_mem_write(addr, data, size_in_bytes);
+    if (action != P4PLUS_CACHE_ACTION_NONE) {
+        sdk::asic::pd::asicpd_p4plus_invalidate_cache(addr, size_in_bytes, action);
+    }
+    return rv == SDK_RET_OK ? true : false;
+}
 
 sdk_ret_t
 asic_program_hbm_table_base_addr (int tableid, int stage_tableid,
@@ -1000,7 +1030,8 @@ asicpd_barco_asym_ecc_point_mul (uint16_t key_size, uint8_t *p,
                                  uint8_t *y1, uint8_t *k, uint8_t *x3,
                                  uint8_t *y3)
 {
-    return SDK_RET_INVALID_OP;
+    return elba_barco_asym_ecc_point_mul(key_size, p, n, xg, yg, a, b, x1,
+                                          y1, k, x3, y3);
 }
 
 sdk_ret_t
@@ -1009,7 +1040,8 @@ asicpd_barco_asym_ecdsa_p256_setup_priv_key (uint8_t *p, uint8_t *n,
                                              uint8_t *a, uint8_t *b,
                                              uint8_t *da, int32_t *key_idx)
 {
-    return SDK_RET_INVALID_OP;
+    return elba_barco_asym_ecdsa_p256_setup_priv_key(p, n, xg, yg,
+                                                       a, b, da, key_idx);
 }
 
 sdk_ret_t
@@ -1022,7 +1054,9 @@ asicpd_barco_asym_ecdsa_p256_sig_gen (int32_t key_idx, uint8_t *p,
                                       bool async_en,
                                       const uint8_t *unique_key)
 {
-    return SDK_RET_INVALID_OP;
+    return elba_barco_asym_ecdsa_p256_sig_gen(key_idx, p, n, xg, yg, a,
+                                               b, da, k, h, r, s,
+                                               async_en, unique_key);
 }
 
 sdk_ret_t
@@ -1034,7 +1068,9 @@ asicpd_barco_asym_ecdsa_p256_sig_verify (uint8_t *p, uint8_t *n,
                                          uint8_t *h, bool async_en,
                                          const uint8_t *unique_key)
 {
-    return SDK_RET_INVALID_OP;
+    return elba_barco_asym_ecdsa_p256_sig_verify(p, n, xg, yg, a, b,
+                                                  xq, yq, r, s, h,
+                                                  async_en, unique_key);
 }
 
 sdk_ret_t
@@ -1043,7 +1079,7 @@ asicpd_barco_asym_rsa2k_encrypt (uint8_t *n, uint8_t *e,
                                  bool async_en,
                                  const uint8_t *unique_key)
 {
-    return SDK_RET_INVALID_OP;
+    return elba_barco_asym_rsa2k_encrypt(n, e, m, c, async_en, unique_key);
 }
 
 sdk_ret_t
@@ -1051,13 +1087,14 @@ asicpd_barco_asym_rsa_encrypt (uint16_t key_size, uint8_t *n,
                                uint8_t *e, uint8_t *m,  uint8_t *c,
                                bool async_en, const uint8_t *unique_key)
 {
-    return SDK_RET_INVALID_OP;
+    return elba_barco_asym_rsa_encrypt(key_size, n, e, m, c, async_en,
+                                        unique_key);
 }
 
 sdk_ret_t
 asicpd_barco_asym_rsa2k_decrypt (uint8_t *n, uint8_t *d, uint8_t *c, uint8_t *m)
 {
-    return SDK_RET_INVALID_OP;
+    return elba_barco_asym_rsa2k_decrypt(n, d, c, m);
 }
 
 sdk_ret_t
@@ -1068,14 +1105,15 @@ asicpd_barco_asym_rsa2k_crt_decrypt (int32_t key_idx, uint8_t *p,
                                      bool async_en,
                                      const uint8_t *unique_key)
 {
-    return SDK_RET_INVALID_OP;
+    return elba_barco_asym_rsa2k_crt_decrypt(key_idx, p, q, dp, dq, qinv,
+                                              c, m, async_en, unique_key);
 }
 
 sdk_ret_t
 asicpd_barco_asym_rsa2k_setup_sig_gen_priv_key (uint8_t *n, uint8_t *d,
                                                 int32_t *key_idx)
 {
-    return SDK_RET_INVALID_OP;
+    return elba_barco_asym_rsa2k_setup_sig_gen_priv_key(n, d, key_idx);
 }
 
 sdk_ret_t
@@ -1084,14 +1122,15 @@ asicpd_barco_asym_rsa2k_crt_setup_decrypt_priv_key (uint8_t *p, uint8_t *q,
                                                     uint8_t *qinv,
                                                     int32_t* key_idx)
 {
-    return SDK_RET_INVALID_OP;
+    return elba_barco_asym_rsa2k_crt_setup_decrypt_priv_key(p, q, dp, dq,
+                                                             qinv, key_idx);
 }
 
 sdk_ret_t
 asicpd_barco_asym_rsa_setup_priv_key (uint16_t key_size, uint8_t *n,
                                       uint8_t *d, int32_t* key_idx)
 {
-    return SDK_RET_INVALID_OP;
+    return elba_barco_asym_rsa_setup_priv_key(key_size, n, d, key_idx);
 }
 
 sdk_ret_t
@@ -1099,7 +1138,8 @@ asicpd_barco_asym_rsa2k_sig_gen (int32_t key_idx, uint8_t *n,
                                  uint8_t *d, uint8_t *h, uint8_t *s,
                                  bool async_en, const uint8_t *unique_key)
 {
-    return SDK_RET_INVALID_OP;
+    return elba_barco_asym_rsa2k_sig_gen(key_idx, n, d, h, s, async_en,
+                                          unique_key);
 }
 
 sdk_ret_t
@@ -1108,7 +1148,8 @@ asicpd_barco_asym_rsa_sig_gen (uint16_t key_size, int32_t key_idx,
                                uint8_t *h, uint8_t *s,
                                bool async_en, const uint8_t *unique_key)
 {
-    return SDK_RET_INVALID_OP;
+    return elba_barco_asym_rsa_sig_gen(key_size, key_idx, n, d, h, s,
+                                        async_en, unique_key);
 }
 
 sdk_ret_t
@@ -1118,7 +1159,11 @@ asicpd_barco_asym_fips_rsa_sig_gen (uint16_t key_size, int32_t key_idx,
                                     uint8_t hash_type, uint8_t sig_scheme,
                                     bool async_en, const uint8_t *unique_key)
 {
-    return SDK_RET_INVALID_OP;
+    return elba_barco_asym_fips_rsa_sig_gen(key_size, key_idx, n, e, msg,
+                                          msg_len, s,
+                                          (hash_type_t) hash_type,
+                                          (rsa_signature_scheme_t) sig_scheme,
+                                          async_en, unique_key);
 }
 
 sdk_ret_t
@@ -1129,14 +1174,17 @@ asicpd_barco_asym_fips_rsa_sig_verify (uint16_t key_size, uint8_t *n,
                                        bool async_en,
                                        const uint8_t *unique_key)
 {
-    return SDK_RET_INVALID_OP;
+    return elba_barco_asym_fips_rsa_sig_verify(key_size, n, e, msg, msg_len, s,
+                                          (hash_type_t) hash_type,
+                                          (rsa_signature_scheme_t) sig_scheme,
+                                          async_en, unique_key);
 }
 
 sdk_ret_t
 asicpd_barco_asym_rsa2k_sig_verify (uint8_t *n, uint8_t *e,
                                     uint8_t *h, uint8_t *s)
 {
-    return SDK_RET_INVALID_OP;
+    return elba_barco_asym_rsa2k_sig_verify(n, e, h, s);
 }
 
 sdk_ret_t
@@ -1155,40 +1203,50 @@ sdk_ret_t
 asicpd_barco_asym_req_descr_get (uint32_t slot_index,
                                  void *asym_req_descr)
 {
-    return SDK_RET_INVALID_OP;
+    return elba_barco_asym_req_descr_get(slot_index,
+                                          (barco_asym_descr_t *)asym_req_descr);
 }
 
 sdk_ret_t
 asicpd_barco_symm_req_descr_get (uint8_t ring_type, uint32_t slot_index,
                                  void *symm_req_descr)
 {
-    return SDK_RET_INVALID_OP;
+    return elba_barco_symm_req_descr_get((barco_rings_t) ring_type, slot_index,
+                                          (barco_symm_descr_t *)symm_req_descr);
 }
 
 sdk_ret_t
 asicpd_barco_ring_meta_get (uint8_t ring_type, uint32_t *pi, uint32_t *ci)
 {
-    return SDK_RET_INVALID_OP;
+    return elba_barco_ring_meta_get((barco_rings_t) ring_type, pi, ci);
 }
 
 sdk_ret_t
 asicpd_barco_get_meta_config_info (uint8_t ring_type,
                                    void *meta)
 {
-    return SDK_RET_INVALID_OP;
+    return elba_barco_get_meta_config_info((barco_rings_t) ring_type,
+                                            (barco_ring_meta_config_t *)meta);
+    //barco_ring_meta_config_t *meta_tmp = (barco_ring_meta_config_t *) meta;
+    //return elba_barco_get_meta_config_info((barco_rings_t) ring_type,
+    //                                        &meta_tmp->shadow_pndx_addr,
+    //                                        &meta_tmp->pndx_size,
+    //                                        &meta_tmp->desc_size,
+    //                                        &meta_tmp->opaque_tag_size);
+    //return SDK_RET_INVALID_OP;
 }
 
 sdk_ret_t
 asicpd_barco_asym_add_pend_req (uint32_t hw_id, uint32_t sw_id)
 {
-    return SDK_RET_INVALID_OP;
+    return elba_barco_asym_add_pend_req(hw_id, sw_id);
 }
 
 sdk_ret_t
 asicpd_barco_asym_poll_pend_req (uint32_t batch_size, uint32_t* id_count,
                                  uint32_t *ids)
 {
-    return SDK_RET_INVALID_OP;
+    return elba_barco_asym_poll_pend_req(batch_size, id_count, ids);
 }
 
 sdk_ret_t
@@ -1197,14 +1255,201 @@ asicpd_barco_sym_hash_process_request (uint8_t hash_type, bool generate,
                                        unsigned char *data, int data_len,
                                        uint8_t *output_digest, int digest_len)
 {
-    return SDK_RET_INVALID_OP;
+    return elba_barco_sym_hash_process_request((CryptoApiHashType) hash_type,
+                                                generate, key, key_len, data,
+                                                data_len, output_digest,
+                                                digest_len);
 }
 
 sdk_ret_t
 asicpd_barco_get_capabilities (uint8_t ring_type, bool *sw_reset_capable,
                                bool *sw_enable_capable)
 {
-    return SDK_RET_INVALID_OP;
+    return elba_barco_get_capabilities((barco_rings_t) ring_type,
+                                         sw_reset_capable,
+                                         sw_enable_capable);
+}
+
+sdk_ret_t
+asicpd_crypto_alloc_key (uint32_t *key_idx)
+{
+    sdk_ret_t              sdk_ret;
+
+    sdk_ret = elba_barco_sym_alloc_key((int32_t *) key_idx);
+
+    if (sdk_ret != SDK_RET_OK) {
+        SDK_TRACE_ERR("SessKey: Failed to allocate key");
+        return sdk_ret;
+    }
+
+    SDK_TRACE_DEBUG("SessKey:%s: Allocated key memory @ index: %0d",
+                    __FUNCTION__, *key_idx);
+    return sdk_ret;
+}
+
+sdk_ret_t
+asicpd_crypto_alloc_key_withid (uint32_t key_idx, bool allow_dup_alloc)
+{
+    sdk_ret_t              sdk_ret;
+
+    sdk_ret = elba_barco_sym_alloc_key_withid(key_idx, allow_dup_alloc);
+
+    if (sdk_ret != SDK_RET_OK) {
+        SDK_TRACE_ERR("SessKey: Failed to allocate key by ID: %0d", key_idx);
+        return sdk_ret;
+    }
+    SDK_TRACE_DEBUG("SessKey:%s: Allocated key memory @ index: %0d",
+                    __FUNCTION__, key_idx);
+    return sdk_ret;
+}
+
+sdk_ret_t
+asicpd_crypto_free_key (uint32_t key_idx)
+{
+    sdk_ret_t              sdk_ret;
+
+    sdk_ret = elba_barco_sym_free_key(key_idx);
+
+    if (sdk_ret != SDK_RET_OK) {
+        SDK_TRACE_ERR("SessKey: Failed to free key memory: %0d", key_idx);
+        return sdk_ret;
+    }
+
+    SDK_TRACE_DEBUG("SessKey:%s: Freed key memory @ index: %0d",
+                    __FUNCTION__, key_idx);
+    return sdk_ret;
+}
+
+sdk_ret_t
+asicpd_crypto_write_key (uint32_t key_idx, crypto_key_t *key)
+{
+    sdk_ret_t              sdk_ret;
+
+    sdk_ret = elba_barco_setup_key(key_idx, (crypto_key_type_t)key->key_type,
+                                    key->key, key->key_size);
+
+    return sdk_ret;
+}
+
+sdk_ret_t
+asicpd_crypto_read_key (uint32_t key_idx, crypto_key_t *key)
+{
+    sdk_ret_t              sdk_ret;
+
+    sdk_ret = elba_barco_read_key(key_idx, (crypto_key_type_t*)&key->key_type,
+                                   key->key, &key->key_size);
+    return sdk_ret;
+}
+
+sdk_ret_t
+asicpd_crypto_asym_alloc_key (uint32_t *key_idx)
+{
+    sdk_ret_t              sdk_ret;
+
+    sdk_ret = elba_barco_asym_alloc_key((int32_t *) key_idx);
+
+    if (sdk_ret != SDK_RET_OK) {
+        SDK_TRACE_ERR("SessKey: Failed to allocate key memory");
+        *key_idx = -1;
+        return sdk_ret;
+    }
+    return sdk_ret;
+}
+
+sdk_ret_t
+asicpd_crypto_asym_free_key (uint32_t key_idx)
+{
+    sdk_ret_t              sdk_ret;
+
+    /* TODO: Also free up the DMA descriptor and corresponding memory regions
+     * if any referenced by the key descriptor
+     */
+
+    sdk_ret = elba_barco_asym_free_key(key_idx);
+
+    if (sdk_ret != SDK_RET_OK) {
+        SDK_TRACE_ERR("AsymKey: Failed to free key memory: %0d", key_idx);
+        return sdk_ret;
+    }
+
+    return sdk_ret;
+}
+
+sdk_ret_t
+asicpd_crypto_asym_write_key (uint32_t key_idx, crypto_asym_key_t *key)
+{
+    sdk_ret_t              sdk_ret;
+
+    elba_barco_asym_key_desc_t     key_desc;
+
+    key_desc.key_param_list = key->key_param_list;
+    key_desc.command_reg = key->command_reg;
+
+    sdk_ret = elba_barco_asym_write_key(key_idx, &key_desc);
+
+    if (sdk_ret != SDK_RET_OK) {
+        SDK_TRACE_ERR("Failed to write Barco Asym key descriptor @ %0d",
+                      key_idx);
+        return sdk_ret;
+    }
+    SDK_TRACE_DEBUG("AsymKey Write: Setup key @ %0d", key_idx);
+
+    return sdk_ret;
+}
+
+sdk_ret_t
+asicpd_crypto_asym_read_key (uint32_t key_idx, crypto_asym_key_t *key)
+{
+    sdk_ret_t              sdk_ret;
+
+    elba_barco_asym_key_desc_t     key_desc;
+
+    sdk_ret = elba_barco_asym_read_key(key_idx, &key_desc);
+
+    if (sdk_ret != SDK_RET_OK) {
+        SDK_TRACE_ERR("Failed to read Barco Asym key descriptor from %0d", key_idx);
+        return sdk_ret;
+    }
+
+    key->key_param_list = key_desc.key_param_list;
+    key->command_reg = key_desc.command_reg;
+
+    return sdk_ret;
+}
+
+sdk_ret_t
+asicpd_crypto_init_ipsec_pad_table (void)
+{
+    uint8_t ipsec_pad_bytes[MAX_IPSEC_PAD_SIZE];
+    uint64_t ipsec_pad_base_addr = 0;
+
+    SDK_TRACE_DEBUG("Initializing IPSEC Pad Bytes table");
+    // Increasing number pattern as per RFC 1-255
+    for (int i = 0; i < MAX_IPSEC_PAD_SIZE; i++) {
+        ipsec_pad_bytes[i] = i+1;
+    }
+
+    ipsec_pad_base_addr = asicpd_get_mem_addr(ASIC_HBM_REG_IPSEC_PAD_TABLE);
+    if (ipsec_pad_base_addr != INVALID_MEM_ADDRESS) {
+        asicpd_p4plus_hbm_write(ipsec_pad_base_addr, ipsec_pad_bytes, MAX_IPSEC_PAD_SIZE,
+                P4PLUS_CACHE_ACTION_NONE);
+    }
+
+    return SDK_RET_OK;
+}
+
+sdk_ret_t
+asicpd_crypto_pd_init (void)
+{
+    sdk_ret_t           sdk_ret = SDK_RET_OK;
+
+    sdk_ret = asicpd_crypto_init_ipsec_pad_table();
+
+    if (sdk_ret != SDK_RET_OK) {
+        return sdk_ret;
+    }
+
+    return sdk_ret;
 }
 
 sdk_ret_t

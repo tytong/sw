@@ -189,6 +189,7 @@ typedef struct elba_barco_ring_s {
     uint16_t            opaque_tag_size;    /*  size of opa tag                 */
     uint16_t            shadow_pndx_size;   /*  size of shadow pindex, if any   */
     uint64_t            shadow_pndx_addr;   /*  address of shadow pindx         */
+    uint64_t            producer_idx_addr;  /*  address of HW pindx register    */
     bool                sw_reset_capable;   /*  support soft ring reset         */
     bool                sw_enable_capable;  /*  support soft ring enable/disable*/
     /* TBD lock/spinlock for ring access */
@@ -280,6 +281,9 @@ sdk_ret_t elba_barco_get_meta_config_info(barco_rings_t ring_type,
                                           uint32_t *shadow_pndx_size,
                                           uint32_t *desc_size,
                                           uint32_t *opaque_tag_size);
+
+sdk_ret_t elba_barco_get_meta_config_info(barco_rings_t ring_type,
+                                           barco_ring_meta_config_t *meta);
 
 sdk_ret_t elba_barco_get_capabilities(barco_rings_t ring_type,
                                       bool *sw_reset_capable,

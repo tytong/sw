@@ -84,6 +84,7 @@ static elba_barco_ring_t  barco_rings[] = {
         sizeof(uint32_t),
         0,
         0,
+        0,
         true,   // run-time modified based on platform
         false,
         elba_barco_asym_init,
@@ -103,6 +104,7 @@ static elba_barco_ring_t  barco_rings[] = {
         0,
         sizeof(uint32_t),
         sizeof(uint32_t),
+        0,
         0,
         true,   // run-time modified based on platform
         false,
@@ -124,6 +126,7 @@ static elba_barco_ring_t  barco_rings[] = {
         sizeof(uint32_t),
         sizeof(uint32_t),
         0,
+        0,
         true,   // run-time modified based on platform
         false,
         elba_barco_sym1_ring0_init,
@@ -143,6 +146,7 @@ static elba_barco_ring_t  barco_rings[] = {
         0,
         sizeof(uint32_t),
         sizeof(uint32_t),
+        0,
         0,
         true,   // run-time modified based on platform
         false,
@@ -164,6 +168,7 @@ static elba_barco_ring_t  barco_rings[] = {
         sizeof(uint32_t),
         sizeof(uint32_t),
         0,
+        0,
         true,   // run-time modified based on platform
         false,
         elba_barco_sym3_ring0_init,
@@ -182,6 +187,7 @@ static elba_barco_ring_t  barco_rings[] = {
         0,
         0,
         sizeof(uint32_t),
+        0,
         0,
         0,
         true,   // run-time modified based on platform
@@ -204,6 +210,7 @@ static elba_barco_ring_t  barco_rings[] = {
         sizeof(uint32_t),
         0,
         0,
+        0,
         true,   // run-time modified based on platform
         false,
         elba_barco_mpp1_init,
@@ -224,6 +231,7 @@ static elba_barco_ring_t  barco_rings[] = {
         sizeof(uint32_t),
         0,
         0,
+        0,
         true,   // run-time modified based on platform
         false,
         elba_barco_mpp2_init,
@@ -242,6 +250,7 @@ static elba_barco_ring_t  barco_rings[] = {
         0,
         0,
         sizeof(uint32_t),
+        0,
         0,
         0,
         true,   // run-time modified based on platform
@@ -272,6 +281,7 @@ static elba_barco_ring_t  barco_rings[] = {
         sizeof(uint32_t),
         sizeof(uint32_t),
         0,
+        0,
         true,   // run-time modified based on platform
         true,   //   "        "
         elba_barco_cp_init,
@@ -291,6 +301,7 @@ static elba_barco_ring_t  barco_rings[] = {
         0,
         0,
         sizeof(uint32_t),
+        0,
         0,
         true,   // run-time modified based on platform
         true,   //   "        "
@@ -312,6 +323,7 @@ static elba_barco_ring_t  barco_rings[] = {
         sizeof(uint32_t),
         sizeof(uint32_t),
         0,
+        0,
         true,   // run-time modified based on platform
         true,   //   "        "
         elba_barco_dc_init,
@@ -331,6 +343,7 @@ static elba_barco_ring_t  barco_rings[] = {
         0,
         0,
         sizeof(uint32_t),
+        0,
         0,
         true,   // run-time modified based on platform
         true,   //   "        "
@@ -417,7 +430,7 @@ elba_barco_asym_key_array_init (void)
     hese.dhs_crypto_ctl.pk0_axi_status.write();
 
     SDK_TRACE_DEBUG("Barco Asym Key Descriptor Array of count %u setup @ 0x%lx",
-            asym_key_array_key_count, asym_key_array_base);
+                    asym_key_array_key_count, asym_key_array_base);
 
     return ret;
 }
@@ -850,13 +863,13 @@ elba_barco_mpp0_poller(elba_barco_ring_t *barco_ring, uint32_t req_tag)
     if (sdk::asic::asic_mem_read(barco_ring->opaque_tag_addr,
                                  (uint8_t*)&curr_opaque_tag,
                                  sizeof(curr_opaque_tag))) {
-        SDK_TRACE_ERR("Poll:%s: Failed to retrieve current opaque tag value @ 0x%lx",
+        SDK_TRACE_ERR("Poll:%s: Failed to retrieve current opaque tag value @ %#lx",
                       barco_ring->ring_name,
                       (uint64_t) barco_ring->opaque_tag_addr);
         return FALSE;
     }
     else {
-        SDK_TRACE_DEBUG("Poll:%s: Retrievd opaque tag value: %u",
+        SDK_TRACE_DEBUG("Poll:%s: Retrievd opaque tag value: %u"
                         barco_ring->ring_name,
                         curr_opaque_tag);
         /* TODO: Handle wraparounds */
@@ -915,8 +928,7 @@ elba_barco_mpp0_queue_request (struct elba_barco_ring_s *barco_ring, void *req,
     if (sdk::asic::asic_mem_write(slot_addr, (uint8_t*)req,
                                   barco_ring->descriptor_size)) {
         SDK_TRACE_ERR("Failed to write MPP Req descriptor entry for %s  @ 0x%lx",
-                      barco_ring->ring_name,
-                      (uint64_t) slot_addr);
+                      barco_ring->ring_name, (uint64_t) slot_addr);
         ret = SDK_RET_INVALID_ARG;
     }
     else {
@@ -1322,12 +1334,11 @@ elba_barco_sym0_ring0_poller (elba_barco_ring_t *barco_ring, uint32_t req_tag)
                                  (uint8_t*)&curr_opaque_tag,
                                  sizeof(curr_opaque_tag))) {
         SDK_TRACE_ERR("Poll:%s: Failed to retrieve current opaque tag value @ 0x%lx",
-                      barco_ring->ring_name,
-                      (uint64_t) barco_ring->opaque_tag_addr);
+                barco_ring->ring_name, (uint64_t) barco_ring->opaque_tag_addr);
         return FALSE;
     }
     else {
-        SDK_TRACE_DEBUG("Poll:%s Retrievd opaque tag value: %u",
+        SDK_TRACE_DEBUG("Poll:%s: Retrievd opaque tag value: %d",
                         barco_ring->ring_name, curr_opaque_tag);
         /* TODO: Handle wraparounds */
         if (curr_opaque_tag >= req_tag)
@@ -1826,7 +1837,7 @@ elba_barco_sym1_ring0_poller (elba_barco_ring_t *barco_ring, uint32_t req_tag)
         return FALSE;
     }
     else {
-        SDK_TRACE_DEBUG("Poll:%s: Retrievd opaque tag value: %u",
+        SDK_TRACE_DEBUG("Poll:%s: Retrievd opaque tag value: %d",
                         barco_ring->ring_name, curr_opaque_tag);
         /* TODO: Handle wraparounds */
         if (curr_opaque_tag >= req_tag)
@@ -1867,14 +1878,12 @@ elba_barco_sym1_ring0_queue_request (struct elba_barco_ring_s *barco_ring,
     sym_req_descr->opaque_tag_value = barco_ring->opaqe_tag_value;
     sym_req_descr->opaque_tag_wr_en = 1;
 
-#if 1
     /*
      * Use doorbell-address in the symm request descriptor to
      * track response from barco.
      */
     sym_req_descr->doorbell_addr = barco_ring->opaque_tag_addr;
     sym_req_descr->doorbell_data = barco_ring->opaqe_tag_value;
-#endif
 
     slot_addr = barco_ring->ring_base + (barco_ring->producer_idx *
                                          barco_ring->descriptor_size);
@@ -1890,7 +1899,6 @@ elba_barco_sym1_ring0_queue_request (struct elba_barco_ring_s *barco_ring,
         (barco_ring->ring_size - 1);
 
     if (schedule_barco) {
-
         /* Barco doorbell */
 #if 0
         elb_top_csr_t &cap0 = ELB_BLK_REG_MODEL_ACCESS(elb_top_csr_t, 0, 0);
@@ -1983,7 +1991,7 @@ elba_barco_rings_init (platform_type_t platform)
                                          (uint8_t *)&opa_tag_def_val,
                                          sizeof(opa_tag_def_val))) {
                 SDK_TRACE_ERR("Ring: %s: Failed to initialized opaque tag @ 0x%lx",
-                              barco_rings[idx].ring_name, opa_tag_addr);
+                    barco_rings[idx].ring_name, opa_tag_addr);
                 return SDK_RET_HW_PROGRAM_ERR;
             }
             SDK_TRACE_DEBUG("Ring: %s: initialized opaque tag to 0 @ 0x%lx",
@@ -2055,6 +2063,21 @@ elba_barco_get_meta_config_info (barco_rings_t ring_type,
 }
 
 sdk_ret_t
+elba_barco_get_meta_config_info (barco_rings_t ring_type,
+                                 barco_ring_meta_config_t *meta)
+{
+    meta->shadow_pndx_addr = barco_rings[ring_type].shadow_pndx_addr;
+    meta->desc_size = barco_rings[ring_type].descriptor_size;
+    meta->pndx_size = barco_rings[ring_type].shadow_pndx_size;
+    meta->opaque_tag_size = barco_rings[ring_type].opaque_tag_size;
+    meta->ring_base = barco_rings[ring_type].ring_base;
+    meta->producer_idx_addr = barco_rings[ring_type].producer_idx_addr;
+    meta->opaque_tag_addr = barco_rings[ring_type].opaque_tag_addr;
+    meta->ring_size = barco_rings[ring_type].ring_size;
+    return SDK_RET_OK;
+}
+
+sdk_ret_t
 elba_barco_get_capabilities (barco_rings_t ring_type,
                              bool *sw_reset_capable, bool *sw_enable_capable)
 {
@@ -2068,7 +2091,6 @@ elba_barco_asym_req_descr_get (uint32_t slot_index,
                                barco_asym_descr_t *asym_req_descr)
 {
   /* To be implemented */
-
   return SDK_RET_OK;
 }
 
@@ -2082,7 +2104,8 @@ elba_barco_symm_req_descr_get (barco_rings_t ring_type,
     uint64_t                    slot_addr;
 
     barco_ring = &barco_rings[ring_type];
-    if (!barco_ring->ring_size || !barco_ring->ring_base) return(SDK_RET_OK);
+    if (!barco_ring->ring_size || !barco_ring->ring_base)
+        return(SDK_RET_OK);
 
     uint8_t  value[barco_ring->descriptor_size];
     uint32_t index = (slot_index % barco_ring->ring_size);
@@ -2143,9 +2166,7 @@ elba_barco_symm_req_descr_get (barco_rings_t ring_type,
 }
 
 sdk_ret_t
-elba_barco_ring_meta_get (barco_rings_t ring_type,
-                          uint32_t *pi,
-                          uint32_t *ci)
+elba_barco_ring_meta_get (barco_rings_t ring_type, uint32_t *pi, uint32_t *ci)
 {
     elb_top_csr_t &cap0 = ELB_BLK_REG_MODEL_ACCESS(elb_top_csr_t, 0, 0);
     elb_mpns_csr_t &mpns = cap0.mp.mpns;
