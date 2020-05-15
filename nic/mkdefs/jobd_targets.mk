@@ -581,3 +581,18 @@ jobd/dol/elba_classic: ${JOBD_PREREQS}
 jobd/dol/elba_eth: ${JOBD_PREREQS}
 	${NICDIR}/tools/sw-env elba iris
 	ASIC=elba ${NICDIR}/run.py ${COVERAGE_OPTS} --topo eth --feature eth --microseg-enable
+
+.PHONY: jobd/dol/elba_storage
+jobd/dol/elba_storage: ${JOBD_PREREQS}
+	${NICDIR}/tools/sw-env elba iris
+	${NICDIR}/run.py ${COVERAGE_OPTS} --storage
+
+.PHONY: jobd/dol/elba_storage/perf
+jobd/dol/elba_storage/perf: ${JOBD_PREREQS}
+	${NICDIR}/tools/sw-env elba iris
+	${NICDIR}/run.py ${COVERAGE_OPTS} --storage --storage_test perf
+
+.PHONY: jobd/dol/elba_storage/nvme
+jobd/elba_storage/nvme: ${JOBD_PREREQS}
+	${NICDIR}/tools/sw-env elba iris
+	${NICDIR}/run.py ${COVERAGE_OPTS} --storage --storage_test nvme_dp
