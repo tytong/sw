@@ -10,7 +10,7 @@ targets:
     build-dependencies:
     - build-iris-x86
   elba_gtests:
-    commands: ["make", "jobd/elba_gtests"]
+    commands: ["make", "ASIC=elba", "jobd/elba_gtests"]
     owners: ["email:vsinha@pensando.io"]
     area:
     sub-area:
@@ -568,7 +568,7 @@ targets:
 
 # ====================== Elba DOLs ===========================
   elba_dol/classic:
-    commands: ["make", "jobd/dol/elba_classic"]
+    commands: ["make", "ASIC=elba", "jobd/dol/elba_classic"]
     owners: ["email:vsinha@pensando.io"]
     area:
     sub-area:
@@ -576,7 +576,7 @@ targets:
     build-dependencies:
     - build-iris-x86-elba
   elba_dol/eth:
-    commands: ["make", "jobd/dol/elba_eth"]
+    commands: ["make", "ASIC=elba", "jobd/dol/elba_eth"]
     owners: ["email:vsinha@pensando.io"]
     area:
     sub-area:
@@ -586,7 +586,7 @@ targets:
 
 # ====================== Storage Tests ===========================
   elba_storage:
-    commands: ["make", "jobd/dol/elba_storage"]
+    commands: ["make", "ASIC=elba", "jobd/dol/elba_storage"]
     owners: ["email:vsinha@pensando.io"]
     area:
     sub-area:
@@ -594,7 +594,7 @@ targets:
     build-dependencies:
     - build-iris-x86-elba
   elba_storage/perf:
-    commands: ["make", "jobd/dol/elba_storage/perf"]
+    commands: ["make", "ASIC=elba", "jobd/dol/elba_storage/perf"]
     owners: ["email:vsinha@pensando.io"]
     area:
     sub-area:
@@ -602,7 +602,7 @@ targets:
     build-dependencies:
     - build-iris-x86-elba
   elba_storage/nvme:
-    commands: ["make", "jobd/dol/elba_storage/nvme"]
+    commands: ["make", "ASIC=elba", "jobd/dol/elba_storage/nvme"]
     owners: ["email:vsinha@pensando.io"]
     area:
     sub-area:
