@@ -9,6 +9,13 @@ targets:
     feature:
     build-dependencies:
     - build-iris-x86
+  elba_gtests:
+    commands: ["make", "jobd/elba_gtests"]
+    owners: ["email:vsinha@pensando.io"]
+    area:
+    sub-area:
+    feature:
+    build-dependencies:
     - build-iris-x86-elba
   halctl:
     commands: ["make", "jobd/halctl"]

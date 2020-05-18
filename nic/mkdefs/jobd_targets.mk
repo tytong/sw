@@ -416,6 +416,11 @@ jobd/gtests: ${JOBD_PREREQS}
 	${NICDIR}/tools/run_gtests.sh ${COVERAGE_OPTS}
 	${NICDIR}/tools/trace_valid.py
 
+.PHONY: jobd/elba_gtests
+jobd/elba_gtests: ${JOBD_PREREQS}
+	${NICDIR}/tools/run_elba_gtests.sh ${COVERAGE_OPTS}
+	${NICDIR}/tools/trace_valid.py
+
 .PHONY: jobd/gtests/platform
 jobd/gtests/platform: ${JOBD_PREREQS}
 	${NICDIR}/tools/trace_valid.py ${NICDIR}/../platform
