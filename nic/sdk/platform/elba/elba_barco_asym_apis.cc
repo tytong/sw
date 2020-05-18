@@ -2118,7 +2118,8 @@ elba_barco_asym_rsa_encrypt (uint16_t key_size, uint8_t *n, uint8_t *e,
         SDK_TRACE_ERR(ELBA_BARCO_API_NAME "Failed to allocate key descriptor");
         goto cleanup;
     }
-    SDK_TRACE_DEBUG(ELBA_BARCO_API_NAME "Allocated Key Descr @ %d", ecc_p256_key_idx);
+    SDK_TRACE_DEBUG(ELBA_BARCO_API_NAME "Allocated Key Descr @ %d",
+                    ecc_p256_key_idx);
 
     asym_key.key_param_list = key_dma_descr_addr1;
     asym_key.command_reg = (ELBA_BARCO_ASYM_CMD_SWAP_BYTES |
@@ -2127,8 +2128,8 @@ elba_barco_asym_rsa_encrypt (uint16_t key_size, uint8_t *n, uint8_t *e,
 
     ret = elba_barco_asym_write_key(ecc_p256_key_idx, &asym_key);
     if (ret != SDK_RET_OK) {
-        SDK_TRACE_ERR(ELBA_BARCO_API_NAME "Failed to write key: %d", ecc_p256_key_idx);
->>>>>>> 6b44818... Port relevant crypto apis from hal pd to asic pd.  Cleanup SDK_TRACE debug statements.
+        SDK_TRACE_ERR(ELBA_BARCO_API_NAME "Failed to write key: %d",
+                      ecc_p256_key_idx);
         goto cleanup;
     }
     SDK_TRACE_DEBUG(ELBA_BARCO_API_NAME "Setup key @ %d", ecc_p256_key_idx);

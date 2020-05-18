@@ -863,15 +863,14 @@ elba_barco_mpp0_poller(elba_barco_ring_t *barco_ring, uint32_t req_tag)
     if (sdk::asic::asic_mem_read(barco_ring->opaque_tag_addr,
                                  (uint8_t*)&curr_opaque_tag,
                                  sizeof(curr_opaque_tag))) {
-        SDK_TRACE_ERR("Poll:%s: Failed to retrieve current opaque tag value @ %#lx",
+        SDK_TRACE_ERR("Poll:%s: Failed to retrieve current opaque tag value @ 0x%lx",
                       barco_ring->ring_name,
                       (uint64_t) barco_ring->opaque_tag_addr);
         return FALSE;
     }
     else {
-        SDK_TRACE_DEBUG("Poll:%s: Retrievd opaque tag value: %u"
-                        barco_ring->ring_name,
-                        curr_opaque_tag);
+        SDK_TRACE_DEBUG("Poll:%s: Retrievd opaque tag value: %u",
+                        barco_ring->ring_name, curr_opaque_tag);
         /* TODO: Handle wraparounds */
         if (curr_opaque_tag >= req_tag)
             ret = TRUE;

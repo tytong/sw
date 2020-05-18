@@ -44,8 +44,8 @@ barco_hex_dump (const uint8_t *buf, size_t sz)
 }
 
 static uint64_t    key_mem_base = 0;
-// static uint64_t    key_mem_size = 0;
-// static char        key_mem[] = ELBA_BARCO_KEY_MEM;
+static uint64_t    key_mem_size = 0;
+static char        key_mem[] = ELBA_BARCO_KEY_MEM;
 static indexer    *elba_barco_sym_keys_idxr_ = NULL;
 
 sdk_ret_t
