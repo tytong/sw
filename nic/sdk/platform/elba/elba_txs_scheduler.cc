@@ -146,6 +146,138 @@ elba_txs_scheduler_init (uint32_t admin_cos, asic_cfg_t *elba_cfg)
     uint64_t            txs_sched_hbm_base_addr;
     uint16_t            dtdm_lo_map, dtdm_hi_map;
 
+    // KALYAN ^^^^^^^^^^^ men init start ^^^^^^^^^^^^
+    // init all sch tables
+    txs_csr.dhs_sch_cache_idx_sram.entry[0].all(1);
+    txs_csr.dhs_sch_cache_idx_sram.entry[0].write();
+    txs_csr.dhs_sch_cache_idx_sram.entry[0].read();
+    for (int ii=0; ii<txs_csr.dhs_sch_cache_idx_sram.get_depth_entry(); ii++) {
+       txs_csr.dhs_sch_cache_idx_sram.entry[ii].all(0);
+       txs_csr.dhs_sch_cache_idx_sram.entry[ii].write();
+    }
+ 
+    txs_csr.dhs_sch_cache_data_wb_sram.entry[0].all(1);
+    txs_csr.dhs_sch_cache_data_wb_sram.entry[0].write();
+    txs_csr.dhs_sch_cache_data_wb_sram.entry[0].read();
+    for (int ii=0; ii<txs_csr.dhs_sch_cache_data_wb_sram.get_depth_entry(); ii++) {
+       txs_csr.dhs_sch_cache_data_wb_sram.entry[ii].all(0);
+       txs_csr.dhs_sch_cache_data_wb_sram.entry[ii].write();
+    }
+ 
+ 
+    txs_csr.dhs_sch_cache_data_sram.entry[0].all(cpp_int ("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"));
+    txs_csr.dhs_sch_cache_data_sram.entry[0].write();
+    txs_csr.dhs_sch_cache_data_sram.entry[0].read();
+    for (int ii=0; ii<txs_csr.dhs_sch_cache_data_sram.get_depth_entry(); ii++) {
+       txs_csr.dhs_sch_cache_data_sram.entry[ii].all(0);
+       txs_csr.dhs_sch_cache_data_sram.entry[ii].write();
+    }
+ 
+    txs_csr.dhs_sch_rlid_map_sram.entry[0].all(1);
+    txs_csr.dhs_sch_rlid_map_sram.entry[0].write();
+    txs_csr.dhs_sch_rlid_map_sram.entry[0].read();
+    for (int ii=0; ii<txs_csr.dhs_sch_rlid_map_sram.get_depth_entry(); ii++) {
+      txs_csr.dhs_sch_rlid_map_sram.entry[ii].all(0);
+      txs_csr.dhs_sch_rlid_map_sram.entry[ii].write();
+    }
+ 
+    txs_csr.dhs_sch_lif_dwrr_cfg_sram.entry[0].all(1);
+    txs_csr.dhs_sch_lif_dwrr_cfg_sram.entry[0].write();
+    txs_csr.dhs_sch_lif_dwrr_cfg_sram.entry[0].read();
+    for (int ii=0; ii<txs_csr.dhs_sch_lif_dwrr_cfg_sram.get_depth_entry(); ii++) {
+       txs_csr.dhs_sch_lif_dwrr_cfg_sram.entry[ii].all(0);
+       txs_csr.dhs_sch_lif_dwrr_cfg_sram.entry[ii].write();
+    }
+   
+    txs_csr.dhs_sch_lif_dwrr_counter_sram.entry[0].all(1);
+    txs_csr.dhs_sch_lif_dwrr_counter_sram.entry[0].write();
+    txs_csr.dhs_sch_lif_dwrr_counter_sram.entry[0].read();
+    for (int ii=0; ii<txs_csr.dhs_sch_lif_dwrr_counter_sram.get_depth_entry(); ii++) {
+       txs_csr.dhs_sch_lif_dwrr_counter_sram.entry[ii].all(0);
+       txs_csr.dhs_sch_lif_dwrr_counter_sram.entry[ii].write();
+    }
+ 
+    txs_csr.dhs_sch_lif_base_map_sram.entry[0].all(1);
+    txs_csr.dhs_sch_lif_base_map_sram.entry[0].write();
+    txs_csr.dhs_sch_lif_base_map_sram.entry[0].read();
+    for (int ii=0; ii<txs_csr.dhs_sch_lif_base_map_sram.get_depth_entry(); ii++) {
+       txs_csr.dhs_sch_lif_base_map_sram.entry[ii].all(0);
+       txs_csr.dhs_sch_lif_base_map_sram.entry[ii].write();
+    }
+ 
+    txs_csr.dhs_sch_qgrp_cfg_0_sram.entry[0].all(1);
+    txs_csr.dhs_sch_qgrp_cfg_0_sram.entry[0].write();
+    txs_csr.dhs_sch_qgrp_cfg_0_sram.entry[0].read();
+    for (int ii=0; ii<txs_csr.dhs_sch_qgrp_cfg_0_sram.get_depth_entry(); ii++) {
+       txs_csr.dhs_sch_qgrp_cfg_0_sram.entry[ii].all(0);
+       txs_csr.dhs_sch_qgrp_cfg_0_sram.entry[ii].write();
+    }
+    
+    txs_csr.dhs_sch_qgrp_cfg_1_sram.entry[0].all(1);
+    txs_csr.dhs_sch_qgrp_cfg_1_sram.entry[0].write();
+    txs_csr.dhs_sch_qgrp_cfg_1_sram.entry[0].read();
+    for (int ii=0; ii<txs_csr.dhs_sch_qgrp_cfg_1_sram.get_depth_entry(); ii++) {
+       txs_csr.dhs_sch_qgrp_cfg_1_sram.entry[ii].all(0);
+       txs_csr.dhs_sch_qgrp_cfg_1_sram.entry[ii].write();
+    }
+ 
+    for (int ii=0; ii<txs_csr.dhs_sch_lif_cfg_sram.get_depth_entry(); ii++) {
+       txs_csr.dhs_sch_lif_cfg_sram.entry[ii].all(0);
+       txs_csr.dhs_sch_lif_cfg_sram.entry[ii].disabled(1);
+       txs_csr.dhs_sch_lif_cfg_sram.entry[ii].write();
+    }
+ 
+    txs_csr.dhs_sch_lif_counter_sram.entry[0].all(1);
+    txs_csr.dhs_sch_lif_counter_sram.entry[0].write();
+    txs_csr.dhs_sch_lif_counter_sram.entry[0].read();
+    for (int ii=0; ii<txs_csr.dhs_sch_lif_counter_sram.get_depth_entry(); ii++) {
+       txs_csr.dhs_sch_lif_counter_sram.entry[ii].all(0);
+       txs_csr.dhs_sch_lif_counter_sram.entry[ii].write();
+    }
+ 
+    // LIF status
+    // Lif_next_qgrp_sram.valid = 0, not_empty = 0
+    txs_csr.dhs_sch_lif_next_qgrp_sram.entry[0].all(1);
+    txs_csr.dhs_sch_lif_next_qgrp_sram.entry[0].write();
+    txs_csr.dhs_sch_lif_next_qgrp_sram.entry[0].read();
+    for (int ii=0; ii<txs_csr.dhs_sch_lif_next_qgrp_sram.get_depth_entry(); ii++) {
+       txs_csr.dhs_sch_lif_next_qgrp_sram.entry[ii].all(0);
+       txs_csr.dhs_sch_lif_next_qgrp_sram.entry[ii].write();
+    }
+ 
+    // Qgrp status
+    // Qgrp_counter_sram.qid0_vld =0, not_empty = 0
+    txs_csr.dhs_sch_qgrp_counter_0_sram.entry[0].all(1);
+    txs_csr.dhs_sch_qgrp_counter_0_sram.entry[0].write();
+    txs_csr.dhs_sch_qgrp_counter_0_sram.entry[0].read();
+    for (int ii=0; ii<txs_csr.dhs_sch_qgrp_counter_0_sram.get_depth_entry(); ii++) {
+       txs_csr.dhs_sch_qgrp_counter_0_sram.entry[ii].all(0);
+       txs_csr.dhs_sch_qgrp_counter_0_sram.entry[ii].write();
+    }
+    txs_csr.dhs_sch_qgrp_counter_1_sram.entry[0].all(1);
+    txs_csr.dhs_sch_qgrp_counter_1_sram.entry[0].write();
+    txs_csr.dhs_sch_qgrp_counter_1_sram.entry[0].read();
+    for (int ii=0; ii<txs_csr.dhs_sch_qgrp_counter_1_sram.get_depth_entry(); ii++) {
+       txs_csr.dhs_sch_qgrp_counter_1_sram.entry[ii].all(0);
+       txs_csr.dhs_sch_qgrp_counter_1_sram.entry[ii].write();
+    }
+    // Qgrp_next_qid_sram.qid1_vld = 0, next_zone_vld = 0, cache_read = 0
+    PLOG_MSG("inside init_txs txs_csr.dhs_sch_qgrp_next_qid.entry\n");
+    txs_csr.dhs_sch_qgrp_next_qid_0_sram.entry[0].all(1);
+    txs_csr.dhs_sch_qgrp_next_qid_0_sram.entry[0].write();
+    txs_csr.dhs_sch_qgrp_next_qid_0_sram.entry[0].read();
+    for (int ii=0; ii<txs_csr.dhs_sch_qgrp_next_qid_0_sram.get_depth_entry(); ii++) {
+       txs_csr.dhs_sch_qgrp_next_qid_0_sram.entry[ii].all(0);
+       txs_csr.dhs_sch_qgrp_next_qid_0_sram.entry[ii].write();
+    }
+    txs_csr.dhs_sch_qgrp_next_qid_1_sram.entry[0].all(1);
+    txs_csr.dhs_sch_qgrp_next_qid_1_sram.entry[0].write();
+    txs_csr.dhs_sch_qgrp_next_qid_1_sram.entry[0].read();
+    for (int ii=0; ii<txs_csr.dhs_sch_qgrp_next_qid_1_sram.get_depth_entry(); ii++) {
+       txs_csr.dhs_sch_qgrp_next_qid_1_sram.entry[ii].all(0);
+       txs_csr.dhs_sch_qgrp_next_qid_1_sram.entry[ii].write();
+    }
+    // KALYAN ^^^^^^^^^^^ men init done ^^^^^^^^^^^^
     txs_csr.cfw_timer_glb.read();
     txs_csr.cfw_timer_glb.ftmr_enable(0);
     txs_csr.cfw_timer_glb.stmr_enable(0);
