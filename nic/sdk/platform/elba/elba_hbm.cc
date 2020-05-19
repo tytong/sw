@@ -148,6 +148,7 @@ elba_hbm_cache_program_region (mpartition_region_t *reg, uint32_t inst_id,
                                uint32_t filter_idx, bool slave, bool master)
 {
 
+   if(!getenv("NO_INVF_FILTER")) {
     elb_pics_csr_t & pics_csr = ELB_BLK_REG_MODEL_ACCESS(elb_pics_csr_t, 0, inst_id);
     pics_csr.p4invf.filter_addr_lo.data[filter_idx].read();
     pics_csr.p4invf.filter_addr_lo.data[filter_idx].value(g_elba_state_pd->mempartition()->addr(reg->start_offset) >> 6); //28 MSB bits only
@@ -165,8 +166,9 @@ elba_hbm_cache_program_region (mpartition_region_t *reg, uint32_t inst_id,
     pics_csr.p4invf.filter_addr_ctl.value[filter_idx].read_access(1);
     pics_csr.p4invf.filter_addr_ctl.value[filter_idx].write_access(1);
     pics_csr.p4invf.filter_addr_ctl.value[filter_idx].write();
+   }
 
-    return SDK_RET_OK;
+   return SDK_RET_OK;
 }
 
 sdk_ret_t
