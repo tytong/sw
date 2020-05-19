@@ -11,7 +11,7 @@
 #include "third-party/asic/elba/model/utils/elb_blk_reg_model.h"
 #include "third-party/asic/elba/model/elb_top/elb_top_csr.h"
 #include "third-party/asic/elba/model/elb_txs/elb_txs_csr.h"
-#include "third-party/asic/elba/verif/apis/elb_txs_api.h"
+#include "third-party/asic/elba/verif/apis/elb_txs_sw_api.h"
 #include "third-party/asic/elba/model/elb_wa/elb_wa_csr.h"
 
 namespace sdk {
