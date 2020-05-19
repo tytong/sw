@@ -249,7 +249,7 @@ block_info_t blocks_info[MAX_INIT_BLOCKS];
 static void
 elba_block_info_init(void)
 {
-    blocks_info[0].inst_count = 1;
+    blocks_info[0].inst_count = 2;
     blocks_info[0].soft_reset = elb_npv_soft_reset;
     blocks_info[0].init_start = elb_npv_init_start;
     blocks_info[0].init_done  = elb_npv_init_done;
@@ -284,7 +284,7 @@ elba_block_info_init(void)
     blocks_info[6].init_start = elb_psp_init_start;
     blocks_info[6].init_done  = elb_psp_init_done;
 
-    blocks_info[7].inst_count = 1;
+    blocks_info[7].inst_count = 2;
     blocks_info[7].soft_reset = elb_ptd_soft_reset;
     blocks_info[7].init_start = elb_ptd_init_start;
     blocks_info[7].init_done  = elb_ptd_init_done;
