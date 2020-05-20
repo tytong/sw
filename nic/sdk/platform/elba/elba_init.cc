@@ -408,7 +408,9 @@ sdk_ret_t
 elba_init (asic_cfg_t *cfg)
 {
     sdk_ret_t ret;
+#if 0
     int sxdma_lifs[] = {35};
+#endif
     char *tm_binary_init = getenv("ELBA_TM_BINARY_INIT");
 
     SDK_ASSERT_TRACE_RETURN((cfg != NULL), SDK_RET_INVALID_ARG, "Invalid cfg");
@@ -449,10 +451,13 @@ elba_init (asic_cfg_t *cfg)
 
     // Init the LIF/QOS-GROUP/Scheduler tabels for default: 512 LIFS,
     // 8 COSs, each map to unique QGroup with 2K QIDs
+#if 0
+    // replaced by txs cfg
     elb_txs_cfg_sch_qgrp_tab(0, 0, 512, 0xff, 1, 4,
                              sizeof(sxdma_lifs)/sizeof(sxdma_lifs[0]),
                              sxdma_lifs);
     SDK_TRACE_DEBUG("Elba scheduler init Done");
+#endif
 
     // Call PXB/PCIE init only in MODEL and RTL simulation
     // This will be done by PCIe manager for the actual chip

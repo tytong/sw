@@ -510,8 +510,6 @@ asicpd_scheduler_stats_get (scheduler_stats_t *sch_stats)
     sch_stats->ratelimit_stop_count = asic_stats.ratelimit_stop_count;
     for (unsigned i = 0; i < SDK_ARRAY_SIZE(asic_stats.cos_stats); i++) {
         sch_stats->cos_stats[i].cos = asic_stats.cos_stats[i].cos;
-        sch_stats->cos_stats[i].doorbell_count =
-            asic_stats.cos_stats[i].doorbell_count;
         sch_stats->cos_stats[i].xon_status =
             asic_stats.cos_stats[i].xon_status;
     }

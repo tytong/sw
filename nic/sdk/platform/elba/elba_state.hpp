@@ -20,6 +20,8 @@ public:
     // get APIs for TXS scheduler related state
     sdk::lib::BMAllocator *txs_scheduler_map_idxr(void)
     { return txs_scheduler_map_idxr_; }
+    sdk::lib::BMAllocator *txs_scheduler_qgrp_idxr(void) 
+    { return txs_scheduler_qgrp_idxr_; }
 
     std::string cfg_path(void) const { return cfg_.cfg_path; }
     mpartition *mempartition(void) const { return cfg_.mempartition; }
@@ -30,6 +32,7 @@ private:
     // TXS scheduler related state
     struct {
         sdk::lib::BMAllocator    *txs_scheduler_map_idxr_;
+        sdk::lib::BMAllocator    *txs_scheduler_qgrp_idxr_;
     } __PACK__;
     asic_cfg_t cfg_; // config
     elb_top_csr_t *elb_top_;

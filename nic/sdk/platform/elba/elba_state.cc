@@ -17,6 +17,7 @@ namespace elba {
 elba_state_pd::elba_state_pd (void)
 {
     txs_scheduler_map_idxr_ = NULL;
+    txs_scheduler_qgrp_idxr_ = NULL;
 }
 
 //------------------------------------------------------------------------------
@@ -25,6 +26,7 @@ elba_state_pd::elba_state_pd (void)
 elba_state_pd::~elba_state_pd (void)
 {
     txs_scheduler_map_idxr_ ? delete txs_scheduler_map_idxr_ : (void)0;
+    txs_scheduler_qgrp_idxr_ ? delete txs_scheduler_qgrp_idxr_ : (void)0;
 }
 
 //------------------------------------------------------------------------------
@@ -38,6 +40,9 @@ elba_state_pd::init (asic_cfg_t *cfg)
         txs_scheduler_map_idxr_ =
                         new sdk::lib::BMAllocator(ELBA_TXS_SCHEDULER_MAP_MAX_ENTRIES);
         SDK_ASSERT_RETURN((txs_scheduler_map_idxr_ != NULL), false);
+        txs_scheduler_qgrp_idxr_ = 
+                        new sdk::lib::BMAllocator(ELBA_TXS_MAX_QGRP_TABLE_ENTRIES);
+        SDK_ASSERT_RETURN((txs_scheduler_qgrp_idxr_ != NULL), false);
         cfg_ = *cfg;
     }
 

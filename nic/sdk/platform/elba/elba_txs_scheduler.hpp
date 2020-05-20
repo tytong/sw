@@ -17,15 +17,18 @@ namespace elba {
 #define NUM_MAX_COSES                           16
 
 #define ELBA_TXS_MAX_TABLE_ENTRIES              2048
-// 2K * 8K scheduler
-#define ELBA_TXS_SCHEDULER_MAP_MAX_ENTRIES      2048
-#define ELBA_TXS_SCHEDULER_NUM_QUEUES_PER_ENTRY 8192
+#define ELBA_TXS_MAX_QGRP_TABLE_ENTRIES         4096
+
+// 16k x 2K chunk qids (32M queues total)
+#define ELBA_TXS_SCHEDULER_MAP_MAX_ENTRIES      16384 // 16k
+
+// number of qid/chunk of qgrp
+#define ELBA_TXS_SCHEDULER_NUM_QUEUES_PER_ENTRY 2048
 
 // Timer definitions
 #define ELBA_TIMER_WHEEL_DEPTH                  4096
 #define ELBA_TIMER_NUM_KEY_PER_CACHE_LINE       16
 #define ELBA_TIMER_NUM_DATA_PER_CACHE_LINE      12
-
 // This needs to be a power of 2
 #define ELBA_TIMER_NUM_KEY_CACHE_LINES          1024
 
@@ -43,10 +46,11 @@ namespace elba {
 
 // (lif,queue,cos) mapping params in scheduler table
 typedef struct elba_txs_sched_lif_params_s_ {
-    uint32_t             sched_table_offset;
-    uint32_t             num_entries_per_cos;
-    uint32_t             total_qcount;
-    uint16_t             cos_bmp;
+    uint32_t             sched_table_offset;    // offset for dhs_sch_qgrp_map_sram table: 16k entries
+    uint32_t             sched_qgrp_offset;     // offset for dhs_sch_qgrp_cfg_0/1_sram tables: 4k entries
+    uint32_t             num_entries_per_cos;   // block_size field in dhs_sch_lif_base_map_sram (number of 2k blocks / cos)
+    uint32_t             total_qcount;          // total number of qids / qgrp (with assumption of 1 qgrp/cos)
+    uint16_t             cos_bmp;               // active_cos
 } __PACK__ elba_txs_sched_lif_params_t;
 
 // (lif,cos) mapping params in policer table
@@ -79,8 +83,16 @@ sdk_ret_t elba_txs_scheduler_tx_alloc(elba_txs_sched_lif_params_t *tx_params,
                                       uint32_t *alloc_offset,
                                       uint32_t *alloc_units);
 
+sdk_ret_t elba_txs_scheduler_tx_qgrp_alloc (elba_txs_sched_lif_params_t *tx_params,
+                                        uint32_t *alloc_qgrp_offset, 
+                                        uint32_t *alloc_qgrp_units);
+
 sdk_ret_t elba_txs_scheduler_tx_dealloc(uint32_t alloc_offset,
                                         uint32_t alloc_units);
+
+sdk_ret_t elba_txs_scheduler_tx_qgrp_dealloc (
+                                        uint32_t alloc_qgrp_offset, 
+                                        uint32_t alloc_qgrp_units);
 
 // elba_txs_policer_lif_params_update
 // API to program txs policer table with lif,cos scheduler-table mappings.
@@ -95,7 +107,6 @@ sdk_ret_t elba_txs_policer_lif_params_update(uint32_t hw_lif_id,
 typedef struct elba_txs_scheduler_cos_stats_s {
     uint32_t cos;
     bool xon_status;
-    uint64_t doorbell_count;
 } elba_txs_scheduler_cos_stats_t;
 
 typedef struct elba_txs_scheduler_stats_s {
@@ -103,6 +114,10 @@ typedef struct elba_txs_scheduler_stats_s {
     uint64_t doorbell_clear_count;
     uint32_t ratelimit_start_count;
     uint32_t ratelimit_stop_count;
+    uint32_t txdma_ptd_feedback_count;
+    uint32_t txdma_phb_feedback_count;
+    uint32_t txdma_sent_count;
+    uint32_t sxdma_sent_count;
     elba_txs_scheduler_cos_stats_t cos_stats[NUM_MAX_COSES];
 } elba_txs_scheduler_stats_t;
 
