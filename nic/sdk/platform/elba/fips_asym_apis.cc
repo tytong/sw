@@ -348,7 +348,7 @@ elba_barco_asym_fips_rsa_sig_gen (uint16_t key_size, int32_t key_idx,
         ret = SDK_RET_ERR;
         goto cleanup;
     }
-    SDK_TRACE_INFO("Sig Len: %d", siglen);
+    SDK_TRACE_INFO("Sig Len: %ld", siglen);
 
     ELBA_BARCO_API_PARAM_HEXDUMP("Msg", (char*)msg, msg_len);
     /* Compute the digest of the message */
