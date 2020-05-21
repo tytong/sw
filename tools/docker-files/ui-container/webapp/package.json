@@ -55,7 +55,7 @@
     "d3": "^5.2.0",
     "font-awesome": "^4.7.0",
     "hammerjs": "^2.0.8",
-    "jquery": "^3.3.1",
+    "jquery": "^3.5.0",
     "karma-verbose-reporter": "^0.0.6",
     "lodash": "^4.17.5",
     "lru_map": "^0.3.3",
