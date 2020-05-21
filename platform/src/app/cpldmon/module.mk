@@ -1,7 +1,6 @@
 # {C} Copyright 2019 Pensando Systems Inc. All rights reserved
 include ${MKDEFS}/pre.mk
 MODULE_TARGET   := cpldmon.bin
-MODULE_ASIC     := capri
 MODULE_PIPELINE = iris
 MODULE_SOLIBS   := pal
 MODULE_LDLIBS   := ${SDK_THIRDPARTY_CAPRI_LDLIBS}

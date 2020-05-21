@@ -23,10 +23,19 @@
 #include <syslog.h>
 #include "gpio.h"
 
+#ifdef ELBA
+#include "third-party/asic/elba/verif/apis/elb_freq_sw_api.h"
+#include "platform/elba/csrint/csr_init.hpp"
+#define  SET_HALF_CLOCK elb_top_set_half_core_clock_mode
+#define  SET_QUARTER_CLOCK_MODE elb_top_set_quarter_core_clock_mode
+#else
 #include "third-party/asic/capri/verif/apis/cap_freq_api.h"
+#include "platform/capri/csrint/csr_init.hpp"
+#define  SET_HALF_CLOCK cap_top_set_half_clock
+#define  SET_QUARTER_CLOCK_MODE cap_top_set_quarter_core_clock_mode
+#endif
 #include "nic/sdk/platform/pal/include/pal.h"
 #include "nic/sdk/lib/pal/pal.hpp"
-#include "platform/capri/csrint/csr_init.hpp"
 #include "nic/utils/trace/trace.hpp"
 #include "nic/sdk/lib/logger/logger.hpp"
 #include "nic/sdk/platform/pciemgr_if/include/pciemgr_if.hpp"
@@ -482,7 +491,11 @@ main(int argc, char *argv[])
     assert(sdk::lib::pal_init(platform_type_t::PLATFORM_TYPE_HW) == sdk::lib::PAL_RET_OK);
 #endif
 
+#ifdef ELBA
+    sdk::platform::elba::csr_init();
+#else
     sdk::platform::capri::csr_init();
+#endif
 
     // u-boot should have set the core clock to 208MHz for SWM/OCP
     if (get_card_power(&card_power) == 0)
@@ -519,14 +532,14 @@ main(int argc, char *argv[])
 
             // Live status check
             if (cpld_cntl_reg & HOST_POWER_ON) {
-                cap_top_set_half_clock(0, 0);
+                SET_HALF_CLOCK(0, 0);
                 sleep(2);
                 if (get_card_power(&card_power) == 0)
                     CLOG_INFO("Main power is on, card power is now {} Watts", card_power);
             }
         } else {
             CLOG_INFO("ALOM not present, core clock set to 416 MHz");
-            cap_top_set_half_clock(0, 0);
+            SET_HALF_CLOCK(0, 0);
             sleep(2);
             if (get_card_power(&card_power) == 0)
                 CLOG_INFO("Card power {} Watts", card_power);
@@ -668,9 +681,9 @@ main(int argc, char *argv[])
                     CLOG_INFO("BEFORE: Card power {} Watts", card_power);
 
                 if ((test_interrupt_cnt % 2) == 0)
-                    cap_top_set_half_clock(0, 0);
+                    SET_HALF_CLOCK(0, 0);
                 else
-                    cap_top_set_quarter_core_clock_mode(0, 0);
+                    SET_QUARTER_CLOCK_MODE(0, 0);
 
                 sleep(2);
                 if (get_card_power(&card_power) == 0)
@@ -691,7 +704,7 @@ main(int argc, char *argv[])
                 if (get_card_power(&card_power) == 0)
                     CLOG_INFO("BEFORE: Card power {} Watts", card_power);
 
-                cap_top_set_half_clock(0, 0);
+                SET_HALF_CLOCK(0, 0);
                 pciemgr->powermode(FULL_POWER);
                 cpld_clear_enable_extended_interrupt(MAIN_POWER_ON);
 
@@ -707,7 +720,7 @@ main(int argc, char *argv[])
                     CLOG_INFO("BEFORE: Card power {} Watts", card_power);
 
                 pciemgr->powermode(LOW_POWER);
-                cap_top_set_quarter_core_clock_mode(0, 0);
+                SET_QUARTER_CLOCK_MODE(0, 0);
                 cpld_clear_enable_extended_interrupt(MAIN_POWER_OFF);
 
                 sleep(2);
@@ -732,7 +745,7 @@ main(int argc, char *argv[])
                     CLOG_INFO("BEFORE: Card power {} Watts", card_power);
 
                 power_break = true;
-                cap_top_set_quarter_core_clock_mode(0, 0);
+                SET_QUARTER_CLOCK_MODE(0, 0);
                 cpld_clear_enable_extended_interrupt(OCP_PWRBRK);
 
                 sleep(2);
