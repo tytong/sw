@@ -36,11 +36,11 @@ elba_txs_timer_init_hsh_depth (uint32_t key_lines)
 
     txs_csr->cfg_timer_static.read();
     SDK_TRACE_DEBUG("hbm_base 0x%lx",
-                    (uint64_t)txs_csr->cfg_timer_static.hbm_base());
+                    txs_csr->cfg_timer_static.hbm_base().convert_to<uint64_t>());
     SDK_TRACE_DEBUG("timer hash depth %u",
-                    int(txs_csr->cfg_timer_static.tmr_hsh_depth()));
+                    txs_csr->cfg_timer_static.tmr_hsh_depth().convert_to<uint32_t>());
     SDK_TRACE_DEBUG("timer wheel depth %u",
-                    int(txs_csr->cfg_timer_static.tmr_wheel_depth()));
+                    txs_csr->cfg_timer_static.tmr_wheel_depth().convert_to<uint32_t>());
     txs_csr->cfg_timer_static.hbm_base(timer_key_hbm_base_addr);
     txs_csr->cfg_timer_static.tmr_hsh_depth(key_lines - 1);
     txs_csr->cfg_timer_static.tmr_wheel_depth(ELBA_TIMER_WHEEL_DEPTH - 1);
@@ -406,7 +406,7 @@ elba_txs_scheduler_lif_params_update (uint32_t hw_lif_id,
     txs_csr.dhs_sch_lif_base_map_sram.entry[hw_lif_id].active(!disable);
     txs_csr.dhs_sch_lif_base_map_sram.entry[hw_lif_id].write();
 
-    SDK_TRACE_DEBUG("Programmed TXS dhs_sch_lif_base_map_sram.entry[lif:%u] base_addr:0x%lx block_size:%u active_cos:0x%x active:%u",
+    SDK_TRACE_DEBUG("Programmed TXS dhs_sch_lif_base_map_sram.entry[lif:%u] base_addr:0x%x block_size:%u active_cos:0x%x active:%u",
                     hw_lif_id, txs_hw_params->sched_table_offset, block_size,
                     lif_cos_bmp, !disable);
 
@@ -463,22 +463,23 @@ elba_txs_scheduler_lif_params_update (uint32_t hw_lif_id,
                        txs_hw_params->sched_table_offset + cos_idx*block_size,
                        cc, qid_start, qid_end, disable);
              } else {
-                txs_csr.dhs_sch_qgrp_cfg_1_sram.entry[qgrp].read();
-                txs_csr.dhs_sch_qgrp_cfg_1_sram.entry[qgrp].no_fb_upd(0);
-                txs_csr.dhs_sch_qgrp_cfg_1_sram.entry[qgrp].rx_sxdma(0);
-                txs_csr.dhs_sch_qgrp_cfg_1_sram.entry[qgrp].cos(cc);
-                txs_csr.dhs_sch_qgrp_cfg_1_sram.entry[qgrp].low_latency(0);
-                txs_csr.dhs_sch_qgrp_cfg_1_sram.entry[qgrp].disabled(disable);
-                txs_csr.dhs_sch_qgrp_cfg_1_sram.entry[qgrp].lif_idx(hw_lif_id);
-                txs_csr.dhs_sch_qgrp_cfg_1_sram.entry[qgrp].max_weight(0x3fff);
-                txs_csr.dhs_sch_qgrp_cfg_1_sram.entry[qgrp].min_weight(0x3fff);
-                txs_csr.dhs_sch_qgrp_cfg_1_sram.entry[qgrp].def_weight(0x40);
-                txs_csr.dhs_sch_qgrp_cfg_1_sram.entry[qgrp].lif_cos_base(txs_hw_params->sched_table_offset + cos_idx*block_size);
-                txs_csr.dhs_sch_qgrp_cfg_1_sram.entry[qgrp].qid_start(qid_start);
-                txs_csr.dhs_sch_qgrp_cfg_1_sram.entry[qgrp].qid_end(qid_end);
-                txs_csr.dhs_sch_qgrp_cfg_1_sram.entry[qgrp].write();
-                SDK_TRACE_DEBUG("Programmed TXS dhs_sch_qgrp_cfg_1_sram entry[q_grp:0x%x] lif_idx:%u lif_cos_base:0x%lx cos:%u qid_start:0x%x qid_end:0x%x disabled:%u ",
-                       qgrp, hw_lif_id,
+                int myqgrp = qgrp - txs_csr.dhs_sch_qgrp_cfg_0_sram.get_depth_entry();
+                txs_csr.dhs_sch_qgrp_cfg_1_sram.entry[myqgrp].read();
+                txs_csr.dhs_sch_qgrp_cfg_1_sram.entry[myqgrp].no_fb_upd(0);
+                txs_csr.dhs_sch_qgrp_cfg_1_sram.entry[myqgrp].rx_sxdma(0);
+                txs_csr.dhs_sch_qgrp_cfg_1_sram.entry[myqgrp].cos(cc);
+                txs_csr.dhs_sch_qgrp_cfg_1_sram.entry[myqgrp].low_latency(0);
+                txs_csr.dhs_sch_qgrp_cfg_1_sram.entry[myqgrp].disabled(disable);
+                txs_csr.dhs_sch_qgrp_cfg_1_sram.entry[myqgrp].lif_idx(hw_lif_id);
+                txs_csr.dhs_sch_qgrp_cfg_1_sram.entry[myqgrp].max_weight(0x3fff);
+                txs_csr.dhs_sch_qgrp_cfg_1_sram.entry[myqgrp].min_weight(0x3fff);
+                txs_csr.dhs_sch_qgrp_cfg_1_sram.entry[myqgrp].def_weight(0x40);
+                txs_csr.dhs_sch_qgrp_cfg_1_sram.entry[myqgrp].lif_cos_base(txs_hw_params->sched_table_offset + cos_idx*block_size);
+                txs_csr.dhs_sch_qgrp_cfg_1_sram.entry[myqgrp].qid_start(qid_start);
+                txs_csr.dhs_sch_qgrp_cfg_1_sram.entry[myqgrp].qid_end(qid_end);
+                txs_csr.dhs_sch_qgrp_cfg_1_sram.entry[myqgrp].write();
+                SDK_TRACE_DEBUG("Programmed TXS dhs_sch_qgrp_cfg_1_sram entry[q_grp:0x%x] lif_idx:%u lif_cos_base:0x%x cos:%u qid_start:0x%x qid_end:0x%x disabled:%u ",
+                       myqgrp, hw_lif_id,
                        txs_hw_params->sched_table_offset + cos_idx*block_size,
                        cc, qid_start, qid_end, disable);
              }
@@ -492,7 +493,7 @@ elba_txs_scheduler_lif_params_update (uint32_t hw_lif_id,
     ///DEBUG get_txs_lif_qgrp_cfg(0, 0);
     ///DEBUG elb_txs_consistency_chk(0, 0);
     SDK_TRACE_DEBUG("Programmed sched-table-offset : %u and entries-per-cos : %u "
-                    "and cos-bmp 0x%lx for hw-lif-id : %u", txs_hw_params->sched_table_offset,
+                    "and cos-bmp 0x%x for hw-lif-id : %u", txs_hw_params->sched_table_offset,
                      txs_hw_params->num_entries_per_cos, lif_cos_bmp, hw_lif_id);
 
     return SDK_RET_OK;
