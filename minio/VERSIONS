@@ -5,7 +5,7 @@ vpp e38c8e4d99f98c73486f7549efe9f0ea18235ee9
 openssl_libs 1.1.0.2
 platform_libs 0.0.44
 storage_libs 0.0.1
-asic_libs 2.0.5
+asic_libs 2.0.6
 ncc_tools 1.0.1
 sorrento_tools c53c3c8d7bb164109e24c3ffc3b7221e7cef31bc
 pbc_config 2.0.1
