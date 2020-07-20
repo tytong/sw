@@ -11,7 +11,7 @@
     "@pensando/swagger-ts-generator": "file:pensando-swagger-ts-generator-1.1.29.tgz",
     "@types/node": "^12.6.8",
     "handlebars": "^4.1.2",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.19",
     "rxjs": "5.5.11",
     "showdown": "^1.9.0",
     "typescript": "^3.5.3",
