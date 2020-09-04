@@ -12,7 +12,7 @@
     "handlebars": "^4.1.2",
     "lodash": "^4.17.11",
     "rxjs": "5.5.11",
-    "showdown": "^1.9.0",
+    "showdown": "^1.9.1",
     "typescript": "^3.5.3",
     "zone.js": "0.8.26"
   },
